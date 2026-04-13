@@ -10,7 +10,7 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icon-192.png" />
   <title>かな Drill</title>
-  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=Noto+Sans+JP:wght@400;500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root {
       --ink:        #1a1a2e;
@@ -167,6 +167,18 @@
     .review-score .lbl { font-size: 12px; color: var(--text-soft); }
 
     ::-webkit-scrollbar { width: 0; }
+
+    /* FONT TOGGLE */
+    :root { --kana-font: 'Noto Sans JP', sans-serif; }
+    body.brush-font { --kana-font: 'Shippori Mincho', serif; }
+    .q-kana, .q-romaji, .study-char, .choice-btn:not(.rom), .bk { font-family: var(--kana-font) !important; }
+
+    .font-toggle { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; background: var(--paper-warm); border-radius: 10px; padding: 8px 12px; }
+    .font-toggle-label { font-size: 11px; color: var(--text-soft); font-weight: 600; flex: 1; }
+    .font-toggle-btns { display: flex; border-radius: 7px; overflow: hidden; border: 1.5px solid var(--ink); }
+    .ftbtn { border: none; padding: 5px 10px; font-size: 11px; font-weight: 600; cursor: pointer; background: transparent; color: var(--text-soft); font-family: 'DM Sans', sans-serif; transition: background .15s; }
+    .ftbtn.active { background: var(--ink); color: var(--paper); }
+    .ftbtn:first-child { border-right: 1px solid var(--ink); }
   </style>
 </head>
 <body>
@@ -213,6 +225,13 @@
       <h2 style="font-family:'Shippori Mincho',serif;font-size:20px;font-weight:800;color:var(--ink)">Study these kana</h2>
       <p style="color:var(--text-soft);font-size:12px;margin-top:4px">Memorise the characters, then take the quiz</p>
     </div>
+    <div class="font-toggle">
+      <span class="font-toggle-label">Kana style</span>
+      <div class="font-toggle-btns">
+        <button class="ftbtn active" id="study-ft-clean" onclick="setFont('clean','study')">Clean</button>
+        <button class="ftbtn" id="study-ft-brush" onclick="setFont('brush','study')">Brush</button>
+      </div>
+    </div>
     <div class="study-grid" id="study-cards"></div>
     <button class="big-btn gold" onclick="beginQuiz()">Start Quiz →</button>
   </div>
@@ -236,7 +255,6 @@
     <div class="question-card" id="question-card"></div>
     <div class="choices-grid" id="choices-grid"></div>
     <div class="feedback-area"><div class="feedback-pill" id="feedback-pill"></div></div>
-    <div class="attempts-row" id="attempts-row"></div>
   </div>
 </div>
 
@@ -249,7 +267,16 @@
       <div class="app-subtitle" id="review-subtitle">10 kana</div>
     </div>
   </div>
-  <div class="card-area" id="review-card-area"></div>
+  <div class="card-area" id="review-card-area">
+    <div class="font-toggle" style="margin-bottom:0">
+      <span class="font-toggle-label">Kana style</span>
+      <div class="font-toggle-btns">
+        <button class="ftbtn" id="rev-ft-clean" onclick="setFont('clean','review')">Clean</button>
+        <button class="ftbtn active" id="rev-ft-brush" onclick="setFont('brush','review')">Brush</button>
+      </div>
+    </div>
+    <div id="review-content"></div>
+  </div>
 </div>
 
 <script>
@@ -383,8 +410,7 @@ const KANA = {
 
 // ── CONSTANTS ──────────────────────────────────────────────────
 const BLOCK_SIZE       = 5;
-const REQUIRED_CYCLES  = 3;
-const MAX_ATTEMPTS     = 3;
+const REQUIRED_CYCLES  = 2;
 const MASTERY_SESSIONS = 3;
 const MASTERY_THRESHOLDS = [0.60, 0.75, 0.90]; // 1-star, 2-star, 3-star (mastered)
 
@@ -404,6 +430,8 @@ let attempts          = 0;
 let phaseOrder        = [];
 let reviewWords       = [], reviewIndex = 0, reviewCorrect = 0, reviewType = '';
 let quizCorrect       = 0, quizTotal = 0;
+let cycleHasMistake   = false; // any mistake in current cycle
+let quizPassed        = false; // both cycles completed without any mistake
 
 // ── PERSISTENCE ────────────────────────────────────────────────
 const getProgress  = () => JSON.parse(localStorage.getItem('kana_v1') || '{}');
@@ -463,7 +491,7 @@ function getDistractors(current, allKana, count) {
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
-  if (id === 'home') renderHome();
+  if (id === 'home') { renderHome(); setFont('clean', null); }
 }
 
 // ── HOME ────────────────────────────────────────────────────────
@@ -585,18 +613,29 @@ function beginQuiz() {
   attempts   = 0;
   quizCorrect = 0;
   quizTotal   = 0;
+  cycleHasMistake = false;
+  quizPassed      = true; // innocent until proven guilty
   phaseOrder  = shuffle(currentBlock);
 
   document.getElementById('quiz-card-area').innerHTML = `
     <div class="quiz-meta">
       <span class="quiz-phase-label" id="quiz-phase-label">Cycle 1</span>
-      <div class="cycle-dots" id="cycle-dots"></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span id="clean-indicator" style="font-size:10px;font-weight:700;letter-spacing:.08em;color:#27ae60">● CLEAN</span>
+        <div class="cycle-dots" id="cycle-dots"></div>
+      </div>
     </div>
     <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="font-toggle">
+      <span class="font-toggle-label">Kana style</span>
+      <div class="font-toggle-btns">
+        <button class="ftbtn ${!document.body.classList.contains('brush-font')?'active':''}" id="quiz-ft-clean" onclick="setFont('clean','quiz')">Clean</button>
+        <button class="ftbtn ${document.body.classList.contains('brush-font')?'active':''}" id="quiz-ft-brush" onclick="setFont('brush','quiz')">Brush</button>
+      </div>
+    </div>
     <div class="question-card" id="question-card"></div>
     <div class="choices-grid" id="choices-grid"></div>
-    <div class="feedback-area"><div class="feedback-pill" id="feedback-pill"></div></div>
-    <div class="attempts-row" id="attempts-row"></div>`;
+    <div class="feedback-area"><div class="feedback-pill" id="feedback-pill"></div></div>`;
 
   showScreen('quiz');
   renderQuizFrame();
@@ -628,13 +667,12 @@ function showQuestion() {
   const doneSteps  = cycleCount * currentBlock.length * 2 + quizPhase * currentBlock.length + wordIndex;
   document.getElementById('progress-fill').style.width = Math.min((doneSteps / totalSteps) * 100, 99) + '%';
 
-  const cycleHints = ['Full hints', 'Fewer hints', 'No hints'];
-  document.getElementById('quiz-phase-label').textContent = `Cycle ${cycleCount+1}/${REQUIRED_CYCLES} · ${cycleHints[Math.min(cycleCount,2)]}`;
+  const cycleLabels = ['With hints', 'No hints'];
+  document.getElementById('quiz-phase-label').textContent = `Cycle ${cycleCount+1}/2 · ${cycleLabels[cycleCount]}`;
 
   const qCard = document.getElementById('question-card');
   const choicesEl = document.getElementById('choices-grid');
   clearFeedback();
-  renderDots();
 
   // Build question and choices
   if (quizPhase === 0) {
@@ -671,41 +709,21 @@ function checkChoice(btn, isCorrect) {
     btn.classList.add('correct');
     showFeedback('correct', '✓ Correct!');
     quizCorrect++;
-    attempts = 0;
     setTimeout(nextWord, 700);
   } else {
     btn.classList.add('wrong');
-    attempts++;
-    renderDots();
-    // Highlight the correct answer
-    allBtns.forEach(b => { if (b.textContent === phaseOrder[wordIndex].char || b.textContent === phaseOrder[wordIndex].rom) b.classList.add('correct'); });
-
-    if (attempts >= MAX_ATTEMPTS) {
-      showFeedback('reveal', 'Correct: ' + (quizPhase === 0 ? phaseOrder[wordIndex].rom : phaseOrder[wordIndex].char));
-      attempts = 0;
-      setTimeout(nextWord, 1800);
-    } else {
-      showFeedback('wrong', '✗ Try again (' + (MAX_ATTEMPTS - attempts) + ' left)');
-      setTimeout(() => {
-        allBtns.forEach(b => { b.classList.remove('wrong','correct'); b.disabled = false; });
-        btn.classList.add('wrong'); // keep the wrong one red for a moment then reset
-        setTimeout(() => {
-          allBtns.forEach(b => { b.classList.remove('wrong','correct'); b.disabled = false; });
-          clearFeedback();
-        }, 300);
-      }, 700);
-    }
-  }
-}
-
-function renderDots() {
-  const row = document.getElementById('attempts-row');
-  if (!row) return;
-  row.innerHTML = '';
-  for (let i = 0; i < MAX_ATTEMPTS; i++) {
-    const d = document.createElement('div');
-    d.className = 'attempt-dot ' + (i < attempts ? 'used' : '');
-    row.appendChild(d);
+    cycleHasMistake = true;
+    quizPassed      = false;
+    // Flip the clean indicator
+    const ind = document.getElementById('clean-indicator');
+    if (ind) { ind.textContent = '✗ MISTAKE'; ind.style.color = '#c0392b'; }
+    // Reveal the correct answer
+    allBtns.forEach(b => {
+      if (b.textContent === phaseOrder[wordIndex].char || b.textContent === phaseOrder[wordIndex].rom)
+        b.classList.add('correct');
+    });
+    showFeedback('reveal', '✗ ' + (quizPhase === 0 ? phaseOrder[wordIndex].rom : phaseOrder[wordIndex].char));
+    setTimeout(nextWord, 1600);
   }
 }
 
@@ -723,7 +741,7 @@ function nextWord() {
   wordIndex++;
   if (wordIndex < phaseOrder.length) { showQuestion(); return; }
 
-  // next phase
+  // next phase within this cycle
   quizPhase++;
   if (quizPhase < 2) {
     wordIndex = 0; phaseOrder = shuffle(currentBlock);
@@ -732,6 +750,7 @@ function nextWord() {
 
   // completed both phases — end of cycle
   quizPhase = 0; cycleCount++;
+  cycleHasMistake = false; // reset for next cycle
   if (cycleCount < REQUIRED_CYCLES) {
     wordIndex = 0; phaseOrder = shuffle(currentBlock);
     renderQuizFrame();
@@ -741,48 +760,57 @@ function nextWord() {
 }
 
 function blockComplete() {
-  const accuracy = quizTotal > 0 ? quizCorrect / quizTotal : 0;
-  recordSession(currentMode, currentBlockIndex, accuracy);
-
-  const ml         = getMasteryLevel(currentMode, currentBlockIndex);
-  const avg        = getMasteryAvg(currentMode, currentBlockIndex);
-  const d          = getMasteryData(currentMode, currentBlockIndex);
-  const sessions   = d.sessions || [];
-  const needed     = Math.max(0, MASTERY_SESSIONS - sessions.length);
-  const pct        = Math.round(accuracy * 100);
+  const accuracy   = quizTotal > 0 ? quizCorrect / quizTotal : 0;
   const kana       = KANA[currentMode];
   const numBlocks  = Math.ceil(kana.length / BLOCK_SIZE);
   const isLast     = currentBlockIndex + 1 >= numBlocks;
 
   document.getElementById('progress-fill').style.width = '100%';
 
-  const emoji = pct >= 90 ? '★' : pct >= 75 ? '🎉' : pct >= 60 ? '👍' : '📚';
-  const msg   = pct >= 90 ? 'Excellent!' : pct >= 75 ? 'Well done!' : pct >= 60 ? 'Getting there!' : 'Keep practising!';
+  if (quizPassed) {
+    // Clean pass — mark done and record session
+    recordSession(currentMode, currentBlockIndex, accuracy);
+    const ml       = getMasteryLevel(currentMode, currentBlockIndex);
+    const d        = getMasteryData(currentMode, currentBlockIndex);
+    const sessions = d.sessions || [];
+    const needed   = Math.max(0, MASTERY_SESSIONS - sessions.length);
 
-  let masteryNote = '';
-  if (ml === 3) masteryNote = 'This block is mastered!';
-  else if (needed > 0) masteryNote = `${needed} more session${needed!==1?'s':''} needed to unlock mastery rating`;
-  else masteryNote = `${Math.round(MASTERY_THRESHOLDS[2]*100)}% avg needed — keep drilling`;
+    let masteryNote = '';
+    if (ml === 3) masteryNote = 'This block is mastered!';
+    else if (needed > 0) masteryNote = `${needed} more perfect run${needed!==1?'s':''} to unlock mastery`;
+    else masteryNote = `${Math.round(MASTERY_THRESHOLDS[2]*100)}% avg needed — keep going`;
 
-  let primaryBtn = '';
-  if (!isLast) {
-    primaryBtn = `<button class="complete-btn" onclick="openBlock(${currentBlockIndex+1})">Next: Block ${currentBlockIndex+2} →</button>`;
+    let primaryBtn = '';
+    if (!isLast) primaryBtn = `<button class="complete-btn" onclick="openBlock(${currentBlockIndex+1})">Next: Block ${currentBlockIndex+2} →</button>`;
+
+    document.getElementById('quiz-card-area').innerHTML = `
+      <div class="complete-card">
+        <div class="big-emoji">★</div>
+        <h2>Block ${currentBlockIndex+1} cleared!</h2>
+        <p>Both cycles — no mistakes</p>
+        <div class="mastery-result">
+          <div class="mr-label">Mastery</div>
+          <div class="mr-stars">${[0,1,2].map(i=>`<div class="mr-star${ml>i?' lit':''}"></div>`).join('')}</div>
+          <div class="mr-note">${masteryNote}</div>
+        </div>
+        ${primaryBtn}
+        <button class="complete-btn" onclick="beginQuiz()">Drill Again ↺</button>
+        <button class="complete-btn secondary" onclick="showScreen('home')">Back to Home</button>
+      </div>`;
+  } else {
+    // Had mistakes — can't unlock, must retry
+    const wrong = quizTotal - quizCorrect;
+    document.getElementById('quiz-card-area').innerHTML = `
+      <div class="complete-card">
+        <div class="big-emoji">📚</div>
+        <h2>Not quite!</h2>
+        <p>${wrong} mistake${wrong!==1?'s':''} — you need a perfect run to unlock the next block</p>
+        <button class="complete-btn" onclick="openBlock(${currentBlockIndex})">Study Again</button>
+        <button class="complete-btn" onclick="beginQuiz()">Retry Quiz ↺</button>
+        <button class="complete-btn secondary" onclick="showScreen('home')">Back to Home</button>
+      </div>`;
   }
-
-  document.getElementById('quiz-card-area').innerHTML = `
-    <div class="complete-card">
-      <div class="big-emoji">${emoji}</div>
-      <h2>${msg}</h2>
-      <p>${pct}% accuracy · ${REQUIRED_CYCLES} cycles · 2 phases</p>
-      <div class="mastery-result">
-        <div class="mr-label">Mastery</div>
-        <div class="mr-stars">${[0,1,2].map(i=>`<div class="mr-star${ml>i?' lit':''}"></div>`).join('')}</div>
-        <div class="mr-note">${masteryNote}</div>
-      </div>
-      ${primaryBtn}
-      <button class="complete-btn" onclick="beginQuiz()">Drill Again ↺</button>
-      <button class="complete-btn secondary" onclick="showScreen('home')">Back to Home</button>
-    </div>`;
+}
 }
 
 function confirmQuit() {
@@ -809,13 +837,15 @@ function startReview(type) {
   const typeLabel = type === 'char-rom' ? 'Kana → Romaji' : 'Romaji → Kana';
   document.getElementById('review-subtitle').textContent = typeLabel + ' · 10 kana';
   showScreen('review');
+  // Default review to brush font for extra challenge
+  setFont('brush', 'review');
   showReviewQ();
 }
 
 function showReviewQ() {
   const w    = reviewWords[reviewIndex];
   const kana = KANA[currentMode];
-  const area = document.getElementById('review-card-area');
+  const area = document.getElementById('review-content');
 
   const isCharRom = reviewType === 'char-rom';
   const prompt    = isCharRom
@@ -869,7 +899,7 @@ function showReviewDone() {
   const pct   = Math.round((reviewCorrect / reviewWords.length) * 100);
   const emoji = pct >= 80 ? '🌟' : pct >= 50 ? '👍' : '📚';
   const msg   = pct === 100 ? 'Perfect score!' : pct >= 80 ? 'Great work!' : pct >= 50 ? 'Getting there!' : 'Keep practising!';
-  document.getElementById('review-card-area').innerHTML = `
+  document.getElementById('review-content').innerHTML = `
     <div class="complete-card">
       <div class="big-emoji">${emoji}</div>
       <h2>${msg}</h2>
@@ -877,6 +907,24 @@ function showReviewDone() {
       <button class="complete-btn" onclick="startReview('${reviewType}')">Try Again ↺</button>
       <button class="complete-btn secondary" onclick="showScreen('home')">Back to Home</button>
     </div>`;
+}
+
+// ── FONT TOGGLE ────────────────────────────────────────────────
+function setFont(style, screen) {
+  if (style === 'brush') {
+    document.body.classList.add('brush-font');
+  } else {
+    document.body.classList.remove('brush-font');
+  }
+  // Update button states for whichever screen's toggle was used
+  const prefixes = { study: 'study', quiz: 'quiz', review: 'rev' };
+  const p = prefixes[screen];
+  if (p) {
+    const cleanBtn = document.getElementById(p + '-ft-clean');
+    const brushBtn = document.getElementById(p + '-ft-brush');
+    if (cleanBtn) cleanBtn.classList.toggle('active', style === 'clean');
+    if (brushBtn) brushBtn.classList.toggle('active', style === 'brush');
+  }
 }
 
 // ── INIT ───────────────────────────────────────────────────────
