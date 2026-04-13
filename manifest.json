@@ -1,0 +1,25 @@
+{
+  "name": "かな Drill",
+  "short_name": "かな",
+  "description": "Hiragana & katakana learning app",
+  "start_url": "/kana-drill/",
+  "scope": "/kana-drill/",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#1a1a2e",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/kana-drill/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/kana-drill/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
