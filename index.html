@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="かな" />
+  <meta name="apple-mobile-web-app-title" content="日本語" />
   <meta name="theme-color" content="#1a1a2e" />
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icon-192.png" />
-  <title>かな Drill</title>
+  <title>日本語 Drill</title>
   <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=Noto+Sans+JP:wght@400;500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -22,163 +22,170 @@
       --gold:       #c9a84c;
       --gold-light: #f0c96a;
       --green:      #27ae60;
-      --blue:       #2980b9;
       --text:       #1a1a2e;
       --text-soft:  #5a5a7a;
       --white:      #ffffff;
       --shadow-lg:  0 8px 40px rgba(26,26,46,0.2);
       --radius:     16px;
       --radius-sm:  10px;
+      --kana-font:  'Noto Sans JP', sans-serif;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html, body { height: 100%; background: var(--ink); font-family: 'DM Sans', sans-serif; color: var(--text); overscroll-behavior: none; }
+    body.brush-font { --kana-font: 'Shippori Mincho', serif; }
 
     .screen { display: none; position: fixed; inset: 0; background: var(--ink); overflow-y: auto; -webkit-overflow-scrolling: touch; }
     .screen.active { display: flex; flex-direction: column; }
 
-    .app-header {
-      background: var(--ink); padding: 12px 20px 14px;
-      padding-top: max(env(safe-area-inset-top, 12px), 12px);
-      display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
-    }
+    .app-header { background: var(--ink); padding: 12px 20px 14px; padding-top: max(env(safe-area-inset-top,12px),12px); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
     .app-title { font-family: 'Shippori Mincho', serif; font-size: 22px; font-weight: 800; color: var(--paper); letter-spacing: .04em; }
     .app-subtitle { font-size: 10px; color: var(--gold); font-weight: 500; letter-spacing: .12em; text-transform: uppercase; margin-top: 2px; }
     .header-back { background: none; border: none; color: var(--gold); font-size: 15px; font-family: 'DM Sans', sans-serif; font-weight: 500; cursor: pointer; padding: 8px 0; display: flex; align-items: center; gap: 6px; }
     .header-back::before { content: '←'; font-size: 18px; }
 
-    .card-area { flex: 1; background: var(--paper); border-radius: 28px 28px 0 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 24px 20px 40px; padding-bottom: max(40px, env(safe-area-inset-bottom, 40px)); }
+    .card-area { flex: 1; background: var(--paper); border-radius: 28px 28px 0 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 24px 20px 40px; padding-bottom: max(40px,env(safe-area-inset-bottom,40px)); }
 
-    /* MODE TABS */
-    .mode-tabs { display: flex; gap: 6px; margin-bottom: 20px; background: var(--paper-warm); border-radius: 12px; padding: 4px; }
-    .mode-tab { flex: 1; border: none; border-radius: 9px; padding: 10px 4px; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600; cursor: pointer; text-align: center; background: transparent; color: var(--text-soft); transition: all .18s; display: flex; flex-direction: column; align-items: center; gap: 3px; }
-    .mode-tab .tab-script { font-family: 'Shippori Mincho', serif; font-size: 17px; }
-    .mode-tab.active { background: var(--ink); color: var(--paper); box-shadow: 0 2px 8px rgba(0,0,0,.15); }
-    .mode-tab.active .tab-script { color: var(--gold); }
+    /* TOP TABS */
+    .top-tabs { display: flex; gap: 4px; margin-bottom: 18px; background: var(--paper-warm); border-radius: 12px; padding: 4px; }
+    .top-tab { flex: 1; border: none; border-radius: 9px; padding: 7px 2px; font-family: 'DM Sans', sans-serif; font-size: 9px; font-weight: 600; cursor: pointer; text-align: center; background: transparent; color: var(--text-soft); transition: all .18s; display: flex; flex-direction: column; align-items: center; gap: 2px; line-height: 1.3; }
+    .top-tab .ti { font-family: 'Shippori Mincho', serif; font-size: 16px; }
+    .top-tab.active { background: var(--ink); color: var(--paper); box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+    .top-tab.active .ti { color: var(--gold); }
 
     /* HOME */
-    .home-hero { text-align: center; padding: 4px 0 16px; }
-    .kanji-bg { font-family: 'Shippori Mincho', serif; font-size: 70px; color: var(--ink); opacity: .07; line-height: 1; user-select: none; letter-spacing: -4px; }
-    .home-hero h2 { font-family: 'Shippori Mincho', serif; font-size: 22px; font-weight: 800; color: var(--ink); margin-top: -18px; }
-    .home-hero p { color: var(--text-soft); font-size: 12px; margin-top: 5px; }
+    .home-hero { text-align: center; padding: 4px 0 14px; }
+    .kanji-bg { font-family: 'Shippori Mincho', serif; font-size: 68px; color: var(--ink); opacity: .07; line-height: 1; user-select: none; letter-spacing: -4px; }
+    .home-hero h2 { font-family: 'Shippori Mincho', serif; font-size: 20px; font-weight: 800; color: var(--ink); margin-top: -16px; }
+    .home-hero p { color: var(--text-soft); font-size: 12px; margin-top: 4px; }
 
-    .stats-bar { display: grid; grid-template-columns: repeat(3,1fr); gap: 9px; margin: 14px 0; }
-    .stat-card { background: var(--ink); border-radius: var(--radius-sm); padding: 13px 8px; text-align: center; }
-    .stat-card .num { font-family: 'Shippori Mincho', serif; font-size: 23px; font-weight: 800; color: var(--gold); line-height: 1; }
+    .stats-bar { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin: 12px 0; }
+    .stat-card { background: var(--ink); border-radius: var(--radius-sm); padding: 12px 8px; text-align: center; }
+    .stat-card .num { font-family: 'Shippori Mincho', serif; font-size: 22px; font-weight: 800; color: var(--gold); line-height: 1; }
     .stat-card .lbl { font-size: 9px; color: var(--paper-warm); margin-top: 3px; opacity: .7; text-transform: uppercase; letter-spacing: .08em; }
 
-    .section-heading { font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--text-soft); margin: 18px 0 10px; }
+    .section-heading { font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--text-soft); margin: 14px 0 8px; }
 
-    .block-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 7px; }
-    .block-btn { aspect-ratio: 1; border: none; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; transition: transform .12s; }
+    /* BLOCK GRID */
+    .block-grid   { display: grid; grid-template-columns: repeat(5,1fr); gap: 6px; }
+    .block-grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; }
+    .block-grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; }
+    .block-btn { aspect-ratio: 1; border: none; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 10px; font-weight: 600; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; transition: transform .12s; }
     .block-btn:active { transform: scale(.92); }
     .block-btn.unlocked { background: var(--ink); color: var(--paper); }
     .block-btn.unlocked.complete { background: var(--green); color: var(--white); }
     .block-btn.mastered { background: var(--gold); color: var(--ink); }
     .block-btn.locked { background: var(--paper-warm); color: #bbb; cursor: not-allowed; }
-    .block-btn .bn { font-size: 13px; font-weight: 700; }
-    .block-btn .bk { font-family: 'Shippori Mincho', serif; font-size: 13px; }
+    .block-btn .bn { font-size: 9px; font-weight: 700; opacity: .7; }
+    .block-btn .bk { font-family: 'Shippori Mincho', serif; font-size: 14px; line-height: 1.1; }
+    .block-btn .bs { font-size: 9px; }
 
-    .review-row { margin-top: 10px; }
+    /* REVIEW */
+    .review-row { margin-top: 8px; }
     .review-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .review-btn { background: var(--paper-warm); border: 2px solid var(--ink); border-radius: var(--radius); padding: 13px 8px; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600; color: var(--ink); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: transform .12s; text-align: center; line-height: 1.3; }
+    .review-btn { background: var(--paper-warm); border: 2px solid var(--ink); border-radius: var(--radius); padding: 12px 8px; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600; color: var(--ink); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: transform .12s; text-align: center; line-height: 1.3; }
     .review-btn:active { transform: scale(.96); }
-    .review-btn .ri { font-size: 18px; font-family: 'Shippori Mincho', serif; }
+    .review-btn .ri { font-size: 15px; font-family: 'Shippori Mincho', serif; }
     .review-btn-locked { opacity: .55; cursor: not-allowed; border-style: dashed; }
     .review-lock { font-size: 9px; color: var(--text-soft); margin-top: 2px; font-weight: 400; }
 
     /* MASTERY BANNER */
-    .mastery-banner { background: var(--ink-soft); border: 2px solid var(--gold); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 16px; }
+    .mastery-banner { background: var(--ink-soft); border: 2px solid var(--gold); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 14px; }
     .mastery-banner h3 { font-family: 'Shippori Mincho', serif; font-size: 14px; color: var(--gold-light); margin-bottom: 6px; }
-    .mastery-track { height: 6px; background: rgba(255,255,255,.1); border-radius: 3px; overflow: hidden; margin-bottom: 4px; }
-    .mastery-fill { height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--gold), var(--gold-light)); transition: width .4s ease; }
+    .mastery-track { height: 5px; background: rgba(255,255,255,.1); border-radius: 3px; overflow: hidden; margin-bottom: 4px; }
+    .mastery-fill { height: 5px; border-radius: 3px; background: linear-gradient(90deg, var(--gold), var(--gold-light)); transition: width .4s; }
     .mastery-label { font-size: 10px; color: var(--paper); opacity: .6; }
-    .mastery-stars { display: flex; gap: 4px; margin-top: 6px; }
-    .mastery-star { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid rgba(201,168,76,.4); }
+    .mastery-stars { display: flex; gap: 4px; margin-top: 5px; }
+    .mastery-star { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid rgba(201,168,76,.4); }
     .mastery-star.lit { background: var(--gold); border-color: var(--gold); }
 
-    /* STUDY CARDS */
-    .study-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin-bottom: 20px; }
-    .study-card { background: var(--ink); border-radius: var(--radius-sm); padding: 14px 6px 10px; text-align: center; }
-    .study-char { font-family: 'Shippori Mincho', serif; font-size: 34px; font-weight: 600; color: var(--paper); line-height: 1; }
-    .study-rom { font-size: 12px; color: var(--gold); margin-top: 5px; font-weight: 500; }
-    .study-hint { font-size: 9px; color: var(--paper); opacity: .45; margin-top: 3px; line-height: 1.35; }
+    /* STUDY */
+    .study-grid     { display: grid; grid-template-columns: repeat(5,1fr); gap: 7px; margin-bottom: 18px; }
+    .study-grid-num { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 18px; }
+    .study-card { background: var(--ink); border-radius: var(--radius-sm); padding: 12px 4px 10px; text-align: center; }
+    .study-char { font-family: var(--kana-font); font-size: 30px; color: var(--paper); line-height: 1; }
+    .study-rom  { font-size: 11px; color: var(--gold); margin-top: 4px; font-weight: 500; }
+    .study-hint { font-size: 8px; color: var(--paper); opacity: .4; margin-top: 2px; line-height: 1.3; }
+    .study-card-num { background: var(--ink); border-radius: var(--radius-sm); padding: 12px 8px; text-align: center; }
+    .sn-digit { font-size: 20px; font-weight: 700; color: var(--gold); }
+    .sn-jp    { font-family: 'Shippori Mincho', serif; font-size: 18px; color: var(--paper); margin-top: 3px; }
+    .sn-rom   { font-size: 10px; color: var(--paper); opacity: .5; margin-top: 2px; }
+    .sn-hint  { font-size: 8px; color: var(--paper); opacity: .35; margin-top: 2px; line-height: 1.3; }
 
     /* QUIZ */
-    .quiz-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-    .quiz-phase-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--text-soft); }
+    .quiz-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .quiz-phase-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--text-soft); }
     .cycle-dots { display: flex; gap: 5px; }
     .cycle-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--paper-warm); border: 2px solid var(--ink); transition: background .2s; }
     .cycle-dot.active { background: var(--gold); border-color: var(--gold); }
-    .cycle-dot.done { background: var(--green); border-color: var(--green); }
+    .cycle-dot.done   { background: var(--green); border-color: var(--green); }
 
-    .progress-track { height: 4px; background: var(--paper-warm); border-radius: 2px; margin-bottom: 18px; overflow: hidden; }
-    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--red)); border-radius: 2px; transition: width .35s ease; }
+    .progress-track { height: 4px; background: var(--paper-warm); border-radius: 2px; margin-bottom: 14px; overflow: hidden; }
+    .progress-fill  { height: 100%; background: linear-gradient(90deg, var(--gold), var(--red)); border-radius: 2px; transition: width .35s; }
 
-    .question-card { background: var(--ink); border-radius: 24px; padding: 26px 20px; text-align: center; margin-bottom: 18px; box-shadow: var(--shadow-lg); min-height: 165px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
-    .q-label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .14em; color: var(--gold); opacity: .7; }
-    .q-kana { font-family: 'Shippori Mincho', serif; font-size: 72px; font-weight: 800; color: var(--paper); line-height: 1; letter-spacing: .04em; }
-    .q-romaji { font-size: 22px; font-weight: 500; color: var(--paper); opacity: .85; font-family: 'Shippori Mincho', serif; }
-    .q-hint { font-size: 13px; color: var(--gold-light); font-style: italic; opacity: .8; }
+    .question-card { background: var(--ink); border-radius: 24px; padding: 24px 20px; text-align: center; margin-bottom: 14px; box-shadow: var(--shadow-lg); min-height: 155px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+    .q-label  { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .14em; color: var(--gold); opacity: .7; }
+    .q-kana   { font-family: var(--kana-font); font-size: 68px; font-weight: 700; color: var(--paper); line-height: 1; }
+    .q-romaji { font-size: 20px; font-weight: 500; color: var(--paper); opacity: .85; font-family: 'Shippori Mincho', serif; }
+    .q-hint   { font-size: 12px; color: var(--gold-light); font-style: italic; opacity: .75; }
+    .q-number { font-size: 52px; font-weight: 700; color: var(--paper); font-family: 'DM Sans', sans-serif; line-height: 1; }
+    .q-jp     { font-family: 'Shippori Mincho', serif; font-size: 36px; color: var(--paper); line-height: 1.1; }
 
-    /* MULTIPLE CHOICE */
-    .choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-    .choice-btn { border: 2.5px solid var(--paper-warm); border-radius: var(--radius); padding: 16px 10px; font-family: 'Shippori Mincho', serif; font-size: 28px; color: var(--ink); background: var(--white); cursor: pointer; text-align: center; transition: transform .1s, border-color .12s; line-height: 1.2; }
-    .choice-btn.rom { font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 600; padding: 18px 10px; }
-    .choice-btn:active { transform: scale(.95); }
-    .choice-btn.correct { border-color: var(--green); background: #f0fff4; }
-    .choice-btn.wrong { border-color: var(--red-light); background: #fff5f5; }
+    .choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 12px; }
+    .choice-btn { border: 2.5px solid var(--paper-warm); border-radius: var(--radius); padding: 14px 8px; font-family: 'Shippori Mincho', serif; font-size: 24px; color: var(--ink); background: var(--white); cursor: pointer; text-align: center; transition: transform .1s, border-color .12s; line-height: 1.2; }
+    .choice-btn.rom   { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; padding: 15px 8px; }
+    .choice-btn.num   { font-family: 'DM Sans', sans-serif; font-size: 20px; font-weight: 700; padding: 15px 8px; }
+    .choice-btn.jpnum { font-family: 'Shippori Mincho', serif; font-size: 20px; padding: 13px 8px; }
+    .choice-btn:active   { transform: scale(.95); }
+    .choice-btn.correct  { border-color: var(--green); background: #f0fff4; }
+    .choice-btn.wrong    { border-color: var(--red-light); background: #fff5f5; }
     .choice-btn:disabled { cursor: not-allowed; }
 
-    .submit-btn { width: 100%; background: var(--ink); color: var(--paper); border: none; border-radius: var(--radius); padding: 15px; font-size: 16px; font-family: 'DM Sans', sans-serif; font-weight: 600; cursor: pointer; transition: transform .12s; margin-top: 4px; }
+    .answer-input { width: 100%; background: var(--white); border: 2.5px solid var(--paper-warm); border-radius: var(--radius); padding: 14px 16px; font-size: 18px; font-family: 'DM Sans', sans-serif; color: var(--ink); outline: none; transition: border-color .15s; margin-bottom: 10px; text-align: center; }
+    .answer-input:focus   { border-color: var(--gold); }
+    .answer-input.correct { border-color: var(--green); background: #f0fff4; }
+    .answer-input.wrong   { border-color: var(--red-light); background: #fff5f5; }
+    .submit-btn { width: 100%; background: var(--ink); color: var(--paper); border: none; border-radius: var(--radius); padding: 14px; font-size: 16px; font-family: 'DM Sans', sans-serif; font-weight: 600; cursor: pointer; transition: transform .12s; margin-bottom: 2px; }
     .submit-btn:active { transform: scale(.97); }
 
-    .feedback-area { min-height: 42px; display: flex; align-items: center; justify-content: center; margin-top: 10px; }
-    .feedback-pill { padding: 7px 18px; border-radius: 40px; font-size: 13px; font-weight: 600; display: none; align-items: center; gap: 6px; }
-    .feedback-pill.show { display: flex; animation: popIn .2s ease; }
+    .feedback-area { min-height: 38px; display: flex; align-items: center; justify-content: center; margin-top: 8px; }
+    .feedback-pill { padding: 6px 16px; border-radius: 40px; font-size: 13px; font-weight: 600; display: none; align-items: center; }
+    .feedback-pill.show    { display: flex; animation: popIn .2s ease; }
     .feedback-pill.correct { background: #d4edda; color: #155724; }
-    .feedback-pill.wrong { background: #f8d7da; color: #721c24; }
-    .feedback-pill.reveal { background: #fff3cd; color: #856404; }
+    .feedback-pill.wrong   { background: #f8d7da; color: #721c24; }
+    .feedback-pill.reveal  { background: #fff3cd; color: #856404; }
     @keyframes popIn { from { transform: scale(.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-    .attempts-row { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
-    .attempt-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--paper-warm); border: 2px solid #ccc; }
-    .attempt-dot.used { background: var(--red-light); border-color: var(--red-light); }
-
-    .complete-card { background: var(--ink); border-radius: 24px; padding: 34px 20px; text-align: center; color: var(--paper); box-shadow: var(--shadow-lg); }
-    .complete-card .big-emoji { font-size: 50px; margin-bottom: 12px; }
-    .complete-card h2 { font-family: 'Shippori Mincho', serif; font-size: 24px; font-weight: 800; color: var(--gold-light); margin-bottom: 6px; }
-    .complete-card p { color: var(--paper); opacity: .7; font-size: 13px; margin-bottom: 22px; }
-    .complete-card .mastery-result { background: rgba(201,168,76,.12); border: 1px solid rgba(201,168,76,.3); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 18px; }
-    .complete-card .mastery-result .mr-label { font-size: 10px; color: var(--gold); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 6px; }
-    .complete-card .mastery-result .mr-stars { display: flex; gap: 5px; justify-content: center; margin-bottom: 4px; }
-    .complete-card .mastery-result .mr-star { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid rgba(201,168,76,.4); }
-    .complete-card .mastery-result .mr-star.lit { background: var(--gold); border-color: var(--gold); }
-    .complete-card .mastery-result .mr-note { font-size: 11px; color: var(--paper); opacity: .6; }
-    .complete-btn { display: block; width: 100%; background: var(--gold); color: var(--ink); border: none; border-radius: var(--radius); padding: 15px; font-size: 15px; font-family: 'DM Sans', sans-serif; font-weight: 700; cursor: pointer; margin-bottom: 10px; transition: transform .12s; }
-    .complete-btn:active { transform: scale(.97); }
-    .complete-btn.secondary { background: transparent; border: 2px solid rgba(245,240,232,.3); color: var(--paper); opacity: .7; }
-
-    .big-btn { display: block; width: 100%; background: var(--ink); color: var(--paper); border: none; border-radius: var(--radius); padding: 15px; font-size: 15px; font-family: 'DM Sans', sans-serif; font-weight: 600; cursor: pointer; text-align: center; margin-top: 14px; transition: transform .12s; }
-    .big-btn.gold { background: var(--gold); color: var(--ink); font-weight: 700; }
-    .big-btn:active { transform: scale(.97); }
-
-    .review-score { text-align: center; margin-bottom: 16px; }
-    .review-score .frac { font-family: 'Shippori Mincho', serif; font-size: 42px; font-weight: 800; color: var(--ink); }
-    .review-score .lbl { font-size: 12px; color: var(--text-soft); }
-
-    ::-webkit-scrollbar { width: 0; }
-
     /* FONT TOGGLE */
-    :root { --kana-font: 'Noto Sans JP', sans-serif; }
-    body.brush-font { --kana-font: 'Shippori Mincho', serif; }
-    .q-kana, .q-romaji, .study-char, .choice-btn:not(.rom), .bk { font-family: var(--kana-font) !important; }
-
-    .font-toggle { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; background: var(--paper-warm); border-radius: 10px; padding: 8px 12px; }
+    .font-toggle { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; background: var(--paper-warm); border-radius: 10px; padding: 7px 12px; }
     .font-toggle-label { font-size: 11px; color: var(--text-soft); font-weight: 600; flex: 1; }
     .font-toggle-btns { display: flex; border-radius: 7px; overflow: hidden; border: 1.5px solid var(--ink); }
     .ftbtn { border: none; padding: 5px 10px; font-size: 11px; font-weight: 600; cursor: pointer; background: transparent; color: var(--text-soft); font-family: 'DM Sans', sans-serif; transition: background .15s; }
     .ftbtn.active { background: var(--ink); color: var(--paper); }
-    .ftbtn:first-child { border-right: 1px solid var(--ink); }
+    .ftbtn:first-child { border-right: 1px solid rgba(26,26,46,.2); }
+
+    /* COMPLETE */
+    .complete-card { background: var(--ink); border-radius: 24px; padding: 30px 20px; text-align: center; color: var(--paper); box-shadow: var(--shadow-lg); }
+    .complete-card .big-emoji { font-size: 46px; margin-bottom: 10px; }
+    .complete-card h2 { font-family: 'Shippori Mincho', serif; font-size: 22px; font-weight: 800; color: var(--gold-light); margin-bottom: 5px; }
+    .complete-card p  { color: var(--paper); opacity: .7; font-size: 13px; margin-bottom: 18px; }
+    .mastery-result { background: rgba(201,168,76,.12); border: 1px solid rgba(201,168,76,.3); border-radius: var(--radius-sm); padding: 11px; margin-bottom: 14px; }
+    .mr-label { font-size: 10px; color: var(--gold); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 5px; }
+    .mr-stars { display: flex; gap: 5px; justify-content: center; margin-bottom: 4px; }
+    .mr-star  { width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid rgba(201,168,76,.4); }
+    .mr-star.lit { background: var(--gold); border-color: var(--gold); }
+    .mr-note  { font-size: 11px; color: var(--paper); opacity: .6; }
+    .complete-btn { display: block; width: 100%; background: var(--gold); color: var(--ink); border: none; border-radius: var(--radius); padding: 14px; font-size: 15px; font-family: 'DM Sans', sans-serif; font-weight: 700; cursor: pointer; margin-bottom: 9px; transition: transform .12s; }
+    .complete-btn:active { transform: scale(.97); }
+    .complete-btn.secondary { background: transparent; border: 2px solid rgba(245,240,232,.3); color: var(--paper); opacity: .7; }
+
+    .big-btn { display: block; width: 100%; background: var(--ink); color: var(--paper); border: none; border-radius: var(--radius); padding: 15px; font-size: 15px; font-family: 'DM Sans', sans-serif; font-weight: 600; cursor: pointer; text-align: center; margin-top: 12px; transition: transform .12s; }
+    .big-btn.gold { background: var(--gold); color: var(--ink); font-weight: 700; }
+    .big-btn:active { transform: scale(.97); }
+
+    .review-score .frac { font-family: 'Shippori Mincho', serif; font-size: 40px; font-weight: 800; color: var(--ink); text-align: center; }
+    .review-score .lbl  { font-size: 12px; color: var(--text-soft); text-align: center; margin-bottom: 14px; }
+
+    ::-webkit-scrollbar { width: 0; }
   </style>
 </head>
 <body>
@@ -187,26 +194,26 @@
 <div id="screen-home" class="screen active">
   <div class="app-header">
     <div>
-      <div class="app-title">かな Drill</div>
+      <div class="app-title">日本語 Drill</div>
       <div class="app-subtitle" id="home-mode-label">Hiragana</div>
     </div>
   </div>
   <div class="card-area">
-    <div id="mode-tabs-container"></div>
+    <div id="top-tabs-container"></div>
     <div class="home-hero">
       <div class="kanji-bg" id="hero-bg">あいうえお</div>
       <h2 id="hero-title">Hiragana</h2>
-      <p>Learn kana in blocks of 5 — unlock as you go</p>
+      <p id="hero-sub">Learn kana in blocks of 5</p>
     </div>
     <div class="stats-bar">
       <div class="stat-card"><div class="num" id="stat-complete">0</div><div class="lbl">Blocks Done</div></div>
       <div class="stat-card"><div class="num" id="stat-mastered">0</div><div class="lbl">Mastered</div></div>
-      <div class="stat-card"><div class="num" id="stat-total">0</div><div class="lbl">Total Kana</div></div>
+      <div class="stat-card"><div class="num" id="stat-total">0</div><div class="lbl">Total</div></div>
     </div>
     <div id="mastery-banner-container"></div>
     <div class="section-heading">Your Blocks</div>
-    <div class="block-grid" id="block-grid"></div>
-    <div class="section-heading" id="review-heading" style="display:none">Review Unlocked Kana</div>
+    <div id="block-grid-container"></div>
+    <div class="section-heading" id="review-heading" style="display:none">Review</div>
     <div class="review-row" id="review-row"></div>
   </div>
 </div>
@@ -217,22 +224,16 @@
     <button class="header-back" onclick="showScreen('home')">Back</button>
     <div style="text-align:right">
       <div class="app-title" id="study-title">Block 1</div>
-      <div class="app-subtitle" id="study-subtitle">5 kana</div>
+      <div class="app-subtitle" id="study-subtitle">5 items</div>
     </div>
   </div>
   <div class="card-area">
-    <div class="word-list-header" style="text-align:center;margin-bottom:16px">
-      <h2 style="font-family:'Shippori Mincho',serif;font-size:20px;font-weight:800;color:var(--ink)">Study these kana</h2>
-      <p style="color:var(--text-soft);font-size:12px;margin-top:4px">Memorise the characters, then take the quiz</p>
+    <div style="text-align:center;margin-bottom:14px">
+      <h2 style="font-family:'Shippori Mincho',serif;font-size:20px;font-weight:800;color:var(--ink)" id="study-heading">Study these kana</h2>
+      <p style="color:var(--text-soft);font-size:12px;margin-top:4px">Memorise them, then take the quiz</p>
     </div>
-    <div class="font-toggle">
-      <span class="font-toggle-label">Kana style</span>
-      <div class="font-toggle-btns">
-        <button class="ftbtn active" id="study-ft-clean" onclick="setFont('clean','study')">Clean</button>
-        <button class="ftbtn" id="study-ft-brush" onclick="setFont('brush','study')">Brush</button>
-      </div>
-    </div>
-    <div class="study-grid" id="study-cards"></div>
+    <div id="study-font-toggle"></div>
+    <div id="study-cards"></div>
     <button class="big-btn gold" onclick="beginQuiz()">Start Quiz →</button>
   </div>
 </div>
@@ -246,16 +247,7 @@
       <div class="app-subtitle" id="quiz-mode-label">Hiragana</div>
     </div>
   </div>
-  <div class="card-area" id="quiz-card-area">
-    <div class="quiz-meta">
-      <span class="quiz-phase-label" id="quiz-phase-label">Cycle 1</span>
-      <div class="cycle-dots" id="cycle-dots"></div>
-    </div>
-    <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
-    <div class="question-card" id="question-card"></div>
-    <div class="choices-grid" id="choices-grid"></div>
-    <div class="feedback-area"><div class="feedback-pill" id="feedback-pill"></div></div>
-  </div>
+  <div class="card-area" id="quiz-card-area"></div>
 </div>
 
 <!-- REVIEW -->
@@ -264,543 +256,678 @@
     <button class="header-back" onclick="showScreen('home')">Done</button>
     <div style="text-align:right">
       <div class="app-title">Review</div>
-      <div class="app-subtitle" id="review-subtitle">10 kana</div>
+      <div class="app-subtitle" id="review-subtitle">10 items</div>
     </div>
   </div>
-  <div class="card-area" id="review-card-area">
-    <div class="font-toggle" style="margin-bottom:0">
-      <span class="font-toggle-label">Kana style</span>
-      <div class="font-toggle-btns">
-        <button class="ftbtn" id="rev-ft-clean" onclick="setFont('clean','review')">Clean</button>
-        <button class="ftbtn active" id="rev-ft-brush" onclick="setFont('brush','review')">Brush</button>
-      </div>
-    </div>
+  <div class="card-area">
+    <div id="review-font-toggle"></div>
     <div id="review-content"></div>
   </div>
 </div>
 
 <script>
-// ── DATA ──────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════
+
 const KANA = {
   hiragana: [
-    // Block 1 — vowels
-    { char:'あ', rom:'a',   hint:'Looks like an "a"' },
-    { char:'い', rom:'i',   hint:'Two strokes like "i i"' },
-    { char:'う', rom:'u',   hint:'Like a curled "u"' },
-    { char:'え', rom:'e',   hint:'A cross shape' },
-    { char:'お', rom:'o',   hint:'"o" with extra stroke' },
-    // Block 2 — k-row
-    { char:'か', rom:'ka',  hint:'Like a sword' },
-    { char:'き', rom:'ki',  hint:'Looks like a key' },
-    { char:'く', rom:'ku',  hint:'A bird beak' },
-    { char:'け', rom:'ke',  hint:'Tall "ke" shape' },
-    { char:'こ', rom:'ko',  hint:'Two level lines' },
-    // Block 3 — s-row
-    { char:'さ', rom:'sa',  hint:'Like a cross + hook' },
-    { char:'し', rom:'shi', hint:'A fishing hook' },
-    { char:'す', rom:'su',  hint:'A loop with tail' },
-    { char:'せ', rom:'se',  hint:'Like a capital "E"' },
-    { char:'そ', rom:'so',  hint:'A soaring wave' },
-    // Block 4 — t-row
-    { char:'た', rom:'ta',  hint:'A table top' },
-    { char:'ち', rom:'chi', hint:'A cheerful bounce' },
-    { char:'つ', rom:'tsu', hint:'A crashing wave' },
-    { char:'て', rom:'te',  hint:'An antenna' },
-    { char:'と', rom:'to',  hint:'A toe stub' },
-    // Block 5 — n-row
-    { char:'な', rom:'na',  hint:'Like a knotted rope' },
-    { char:'に', rom:'ni',  hint:'Needle and thread' },
-    { char:'ぬ', rom:'nu',  hint:'Noodle swirl' },
-    { char:'ね', rom:'ne',  hint:'A loop with neck' },
-    { char:'の', rom:'no',  hint:'A simple spiral' },
-    // Block 6 — h-row
-    { char:'は', rom:'ha',  hint:'Laughing open mouth' },
-    { char:'ひ', rom:'hi',  hint:'A smile saying "hee"' },
-    { char:'ふ', rom:'fu',  hint:'Mt Fuji from above' },
-    { char:'へ', rom:'he',  hint:'A simple peak' },
-    { char:'ほ', rom:'ho',  hint:'Complex ho shape' },
-    // Block 7 — m-row
-    { char:'ま', rom:'ma',  hint:'A mama bird' },
-    { char:'み', rom:'mi',  hint:'A curly music note' },
-    { char:'む', rom:'mu',  hint:'A mooing cow' },
-    { char:'め', rom:'me',  hint:'A tangled medusa' },
-    { char:'も', rom:'mo',  hint:'A worm on a hook' },
-    // Block 8 — y/r-row
-    { char:'や', rom:'ya',  hint:"A yak's horns" },
-    { char:'ゆ', rom:'yu',  hint:'A "U" with a tail' },
-    { char:'よ', rom:'yo',  hint:'A yo-yo string' },
-    { char:'ら', rom:'ra',  hint:'A radical stroke' },
-    { char:'り', rom:'ri',  hint:'Reeds in water' },
-    // Block 9 — r/w-row
-    { char:'る', rom:'ru',  hint:'A rooster tail' },
-    { char:'れ', rom:'re',  hint:'A reedy curve' },
-    { char:'ろ', rom:'ro',  hint:'A rope coil' },
-    { char:'わ', rom:'wa',  hint:'A wave with a dip' },
-    { char:'を', rom:'wo',  hint:'Particle — wo/o' },
-    // Block 10 — n + dakuten
-    { char:'ん', rom:'n',   hint:'A simple curl' },
-    { char:'が', rom:'ga',  hint:'か + dakuten' },
-    { char:'ぎ', rom:'gi',  hint:'き + dakuten' },
-    { char:'ぐ', rom:'gu',  hint:'く + dakuten' },
-    { char:'げ', rom:'ge',  hint:'け + dakuten' },
+    {char:'あ',rom:'a',   hint:'Looks like an "a"'},
+    {char:'い',rom:'i',   hint:'Two strokes like "ii"'},
+    {char:'う',rom:'u',   hint:'Like a curled "u"'},
+    {char:'え',rom:'e',   hint:'A cross shape'},
+    {char:'お',rom:'o',   hint:'"o" with extra stroke'},
+    {char:'か',rom:'ka',  hint:'Like a sword'},
+    {char:'き',rom:'ki',  hint:'Looks like a key'},
+    {char:'く',rom:'ku',  hint:'A bird beak'},
+    {char:'け',rom:'ke',  hint:'Tall "ke" shape'},
+    {char:'こ',rom:'ko',  hint:'Two level lines'},
+    {char:'さ',rom:'sa',  hint:'Like a cross + hook'},
+    {char:'し',rom:'shi', hint:'A fishing hook'},
+    {char:'す',rom:'su',  hint:'A loop with tail'},
+    {char:'せ',rom:'se',  hint:'Like a capital "E"'},
+    {char:'そ',rom:'so',  hint:'A soaring wave'},
+    {char:'た',rom:'ta',  hint:'A table top'},
+    {char:'ち',rom:'chi', hint:'A cheerful bounce'},
+    {char:'つ',rom:'tsu', hint:'A crashing wave'},
+    {char:'て',rom:'te',  hint:'An antenna'},
+    {char:'と',rom:'to',  hint:'A toe stub'},
+    {char:'な',rom:'na',  hint:'Like a knotted rope'},
+    {char:'に',rom:'ni',  hint:'Needle and thread'},
+    {char:'ぬ',rom:'nu',  hint:'Noodle swirl'},
+    {char:'ね',rom:'ne',  hint:'A loop with neck'},
+    {char:'の',rom:'no',  hint:'A simple spiral'},
+    {char:'は',rom:'ha',  hint:'Laughing open mouth'},
+    {char:'ひ',rom:'hi',  hint:'A smile saying "hee"'},
+    {char:'ふ',rom:'fu',  hint:'Mt Fuji from above'},
+    {char:'へ',rom:'he',  hint:'A simple peak'},
+    {char:'ほ',rom:'ho',  hint:'Complex ho shape'},
+    {char:'ま',rom:'ma',  hint:'A mama bird'},
+    {char:'み',rom:'mi',  hint:'A curly music note'},
+    {char:'む',rom:'mu',  hint:'A mooing cow'},
+    {char:'め',rom:'me',  hint:'A tangled medusa'},
+    {char:'も',rom:'mo',  hint:'A worm on a hook'},
+    {char:'や',rom:'ya',  hint:"A yak's horns"},
+    {char:'ゆ',rom:'yu',  hint:'A "U" with a tail'},
+    {char:'よ',rom:'yo',  hint:'A yo-yo string'},
+    {char:'ら',rom:'ra',  hint:'A radical stroke'},
+    {char:'り',rom:'ri',  hint:'Reeds in water'},
+    {char:'る',rom:'ru',  hint:'A rooster tail'},
+    {char:'れ',rom:'re',  hint:'A reedy curve'},
+    {char:'ろ',rom:'ro',  hint:'A rope coil'},
+    {char:'わ',rom:'wa',  hint:'A wave with a dip'},
+    {char:'を',rom:'wo',  hint:'Particle — wo/o'},
+    {char:'ん',rom:'n',   hint:'A simple curl'},
+    {char:'が',rom:'ga',  hint:'か + dakuten'},
+    {char:'ぎ',rom:'gi',  hint:'き + dakuten'},
+    {char:'ぐ',rom:'gu',  hint:'く + dakuten'},
+    {char:'げ',rom:'ge',  hint:'け + dakuten'},
   ],
   katakana: [
-    // Block 1 — vowels
-    { char:'ア', rom:'a',   hint:'Like a triangle "A"' },
-    { char:'イ', rom:'i',   hint:'A leaning stroke' },
-    { char:'ウ', rom:'u',   hint:'Crown shape' },
-    { char:'エ', rom:'e',   hint:'Like a capital "I"' },
-    { char:'オ', rom:'o',   hint:'Cross with tail' },
-    // Block 2 — k-row
-    { char:'カ', rom:'ka',  hint:'Like a katana' },
-    { char:'キ', rom:'ki',  hint:'Three bars = ki' },
-    { char:'ク', rom:'ku',  hint:'A bird head' },
-    { char:'ケ', rom:'ke',  hint:'Like a "K"' },
-    { char:'コ', rom:'ko',  hint:'Two sides of a square' },
-    // Block 3 — s-row
-    { char:'サ', rom:'sa',  hint:'Three strokes = sa' },
-    { char:'シ', rom:'shi', hint:'Three dots + curve' },
-    { char:'ス', rom:'su',  hint:'A spinning top' },
-    { char:'セ', rom:'se',  hint:'Like a "セ"' },
-    { char:'ソ', rom:'so',  hint:'Two strokes = so' },
-    // Block 4 — t-row
-    { char:'タ', rom:'ta',  hint:'Like a "ta" shape' },
-    { char:'チ', rom:'chi', hint:'Like a "chi" stamp' },
-    { char:'ツ', rom:'tsu', hint:'Three dots + curve' },
-    { char:'テ', rom:'te',  hint:'Like a "T"' },
-    { char:'ト', rom:'to',  hint:'A post with pin' },
-    // Block 5 — n-row
-    { char:'ナ', rom:'na',  hint:'Like a cross' },
-    { char:'ニ', rom:'ni',  hint:'Two lines = ni' },
-    { char:'ヌ', rom:'nu',  hint:'Like a bent "nu"' },
-    { char:'ネ', rom:'ne',  hint:'A network node' },
-    { char:'ノ', rom:'no',  hint:'A simple slash' },
-    // Block 6 — h-row
-    { char:'ハ', rom:'ha',  hint:'Two legs = ha' },
-    { char:'ヒ', rom:'hi',  hint:'Like "F" backwards' },
-    { char:'フ', rom:'fu',  hint:'Like a hook "fu"' },
-    { char:'ヘ', rom:'he',  hint:'Same as hiragana!' },
-    { char:'ホ', rom:'ho',  hint:'Like a "+" sign' },
-    // Block 7 — m-row
-    { char:'マ', rom:'ma',  hint:'Like an angle "ma"' },
-    { char:'ミ', rom:'mi',  hint:'Three horizontal lines' },
-    { char:'ム', rom:'mu',  hint:'Like a cow face' },
-    { char:'メ', rom:'me',  hint:'An "X" crossed' },
-    { char:'モ', rom:'mo',  hint:'Like "mo" shape' },
-    // Block 8 — y/r-row
-    { char:'ヤ', rom:'ya',  hint:'A "Y" shape' },
-    { char:'ユ', rom:'yu',  hint:'Like a square bracket' },
-    { char:'ヨ', rom:'yo',  hint:'Three bars = yo' },
-    { char:'ラ', rom:'ra',  hint:'Like a "7" shape' },
-    { char:'リ', rom:'ri',  hint:'Two strokes = ri' },
-    // Block 9 — r/w-row
-    { char:'ル', rom:'ru',  hint:'A river delta' },
-    { char:'レ', rom:'re',  hint:'Like a "V" stroke' },
-    { char:'ロ', rom:'ro',  hint:'Like a square' },
-    { char:'ワ', rom:'wa',  hint:'Like a "wa" curve' },
-    { char:'ヲ', rom:'wo',  hint:'Particle — wo/o' },
-    // Block 10 — n + dakuten
-    { char:'ン', rom:'n',   hint:'Like a "y" stroke' },
-    { char:'ガ', rom:'ga',  hint:'カ + dakuten' },
-    { char:'ギ', rom:'gi',  hint:'キ + dakuten' },
-    { char:'グ', rom:'gu',  hint:'ク + dakuten' },
-    { char:'ゲ', rom:'ge',  hint:'ケ + dakuten' },
+    {char:'ア',rom:'a',   hint:'Like a triangle "A"'},
+    {char:'イ',rom:'i',   hint:'A leaning stroke'},
+    {char:'ウ',rom:'u',   hint:'Crown shape'},
+    {char:'エ',rom:'e',   hint:'Like a capital "I"'},
+    {char:'オ',rom:'o',   hint:'Cross with tail'},
+    {char:'カ',rom:'ka',  hint:'Like a katana'},
+    {char:'キ',rom:'ki',  hint:'Three bars = ki'},
+    {char:'ク',rom:'ku',  hint:'A bird head'},
+    {char:'ケ',rom:'ke',  hint:'Like a "K"'},
+    {char:'コ',rom:'ko',  hint:'Two sides of a square'},
+    {char:'サ',rom:'sa',  hint:'Three strokes = sa'},
+    {char:'シ',rom:'shi', hint:'Three dots + curve'},
+    {char:'ス',rom:'su',  hint:'A spinning top'},
+    {char:'セ',rom:'se',  hint:'Like a "セ"'},
+    {char:'ソ',rom:'so',  hint:'Two strokes = so'},
+    {char:'タ',rom:'ta',  hint:'Like a "ta" shape'},
+    {char:'チ',rom:'chi', hint:'Like a "chi" stamp'},
+    {char:'ツ',rom:'tsu', hint:'Three dots + curve'},
+    {char:'テ',rom:'te',  hint:'Like a "T"'},
+    {char:'ト',rom:'to',  hint:'A post with pin'},
+    {char:'ナ',rom:'na',  hint:'Like a cross'},
+    {char:'ニ',rom:'ni',  hint:'Two lines = ni'},
+    {char:'ヌ',rom:'nu',  hint:'Like a bent "nu"'},
+    {char:'ネ',rom:'ne',  hint:'A network node'},
+    {char:'ノ',rom:'no',  hint:'A simple slash'},
+    {char:'ハ',rom:'ha',  hint:'Two legs = ha'},
+    {char:'ヒ',rom:'hi',  hint:'Like "F" backwards'},
+    {char:'フ',rom:'fu',  hint:'Like a hook "fu"'},
+    {char:'ヘ',rom:'he',  hint:'Same as hiragana!'},
+    {char:'ホ',rom:'ho',  hint:'Like a "+" sign'},
+    {char:'マ',rom:'ma',  hint:'Like an angle "ma"'},
+    {char:'ミ',rom:'mi',  hint:'Three horizontal lines'},
+    {char:'ム',rom:'mu',  hint:'Like a cow face'},
+    {char:'メ',rom:'me',  hint:'An "X" crossed'},
+    {char:'モ',rom:'mo',  hint:'Like "mo" shape'},
+    {char:'ヤ',rom:'ya',  hint:'A "Y" shape'},
+    {char:'ユ',rom:'yu',  hint:'Like a square bracket'},
+    {char:'ヨ',rom:'yo',  hint:'Three bars = yo'},
+    {char:'ラ',rom:'ra',  hint:'Like a "7" shape'},
+    {char:'リ',rom:'ri',  hint:'Two strokes = ri'},
+    {char:'ル',rom:'ru',  hint:'A river delta'},
+    {char:'レ',rom:'re',  hint:'Like a "V" stroke'},
+    {char:'ロ',rom:'ro',  hint:'Like a square'},
+    {char:'ワ',rom:'wa',  hint:'Like a "wa" curve'},
+    {char:'ヲ',rom:'wo',  hint:'Particle — wo/o'},
+    {char:'ン',rom:'n',   hint:'Like a "y" stroke'},
+    {char:'ガ',rom:'ga',  hint:'カ + dakuten'},
+    {char:'ギ',rom:'gi',  hint:'キ + dakuten'},
+    {char:'グ',rom:'gu',  hint:'ク + dakuten'},
+    {char:'ゲ',rom:'ge',  hint:'ケ + dakuten'},
   ],
 };
 
-// ── CONSTANTS ──────────────────────────────────────────────────
+// Numbers — flat list then grouped into blocks
+const NUM_ITEMS = [
+  // Block 0: 1–10
+  {n:1,   jp:'一', rom:'ichi',        hint:'one stroke'},
+  {n:2,   jp:'二', rom:'ni',          hint:'two strokes'},
+  {n:3,   jp:'三', rom:'san',         hint:'three strokes'},
+  {n:4,   jp:'四', rom:'shi/yon',     hint:'shi or yon both fine'},
+  {n:5,   jp:'五', rom:'go',          hint:''},
+  {n:6,   jp:'六', rom:'roku',        hint:''},
+  {n:7,   jp:'七', rom:'shichi/nana', hint:'shichi or nana'},
+  {n:8,   jp:'八', rom:'hachi',       hint:''},
+  {n:9,   jp:'九', rom:'ku/kyuu',     hint:'ku or kyuu'},
+  {n:10,  jp:'十', rom:'juu',         hint:'ten'},
+  // Block 1: teens + tens
+  {n:11,  jp:'十一', rom:'juuichi',   hint:'10+1'},
+  {n:12,  jp:'十二', rom:'juuni',     hint:'10+2'},
+  {n:13,  jp:'十三', rom:'juusan',    hint:'10+3'},
+  {n:20,  jp:'二十', rom:'nijuu',     hint:'2×10'},
+  {n:30,  jp:'三十', rom:'sanjuu',    hint:'3×10'},
+  {n:40,  jp:'四十', rom:'yonjuu',    hint:'4×10'},
+  {n:50,  jp:'五十', rom:'gojuu',     hint:'5×10'},
+  {n:100, jp:'百',   rom:'hyaku',     hint:'hundred'},
+  // Block 2: hundreds
+  {n:200, jp:'二百', rom:'nihyaku',   hint:''},
+  {n:300, jp:'三百', rom:'sanbyaku',  hint:'byaku! irregular'},
+  {n:400, jp:'四百', rom:'yonhyaku',  hint:''},
+  {n:500, jp:'五百', rom:'gohyaku',   hint:''},
+  {n:600, jp:'六百', rom:'roppyaku',  hint:'pyaku! irregular'},
+  {n:700, jp:'七百', rom:'nanahyaku', hint:''},
+  {n:800, jp:'八百', rom:'happyaku',  hint:'pyaku! irregular'},
+  {n:900, jp:'九百', rom:'kyuuhyaku', hint:''},
+  // Block 3: thousands + man
+  {n:1000,   jp:'千',   rom:'sen',      hint:'thousand'},
+  {n:2000,   jp:'二千', rom:'nisen',    hint:''},
+  {n:3000,   jp:'三千', rom:'sanzen',   hint:'zen! irregular'},
+  {n:8000,   jp:'八千', rom:'hassen',   hint:'hassen! irregular'},
+  {n:10000,  jp:'一万', rom:'ichiman',  hint:'ten thousand'},
+  {n:100000, jp:'十万', rom:'juuman',   hint:'100k'},
+];
+const NUM_BLOCKS = [
+  {label:'1 – 10',       preview:'一', items: NUM_ITEMS.slice(0,10)},
+  {label:'Teens & Tens', preview:'十一',items: NUM_ITEMS.slice(10,18)},
+  {label:'Hundreds',     preview:'百', items: NUM_ITEMS.slice(18,26)},
+  {label:'Thousands',    preview:'千', items: NUM_ITEMS.slice(26,32)},
+];
+
+// Times — o'clock 1–12
+const TIME_ITEMS = [1,2,3,4,5,6,7,8,9,10,11,12].map(h => {
+  const jp  = ['一時','二時','三時','四時','五時','六時','七時','八時','九時','十時','十一時','十二時'][h-1];
+  const rom = ['ichiji','niji','sanji','yoji','goji','rokuji','shichiji','hachiji','kuji','juuji','juuichiji','juuniji'][h-1];
+  return {hour:h, jp, rom};
+});
+const TIME_BLOCKS = [
+  {label:'1 – 4時',  preview:'一時', items: TIME_ITEMS.slice(0,4)},
+  {label:'5 – 8時',  preview:'五時', items: TIME_ITEMS.slice(4,8)},
+  {label:'9 – 12時', preview:'九時', items: TIME_ITEMS.slice(8,12)},
+];
+
+// ═══════════════════════════════════════════════════════
+// CONSTANTS & CONFIG
+// ═══════════════════════════════════════════════════════
 const BLOCK_SIZE       = 5;
 const REQUIRED_CYCLES  = 2;
 const MASTERY_SESSIONS = 3;
-const MASTERY_THRESHOLDS = [0.60, 0.75, 0.90]; // 1-star, 2-star, 3-star (mastered)
+const MASTERY_T        = [0.60, 0.75, 0.90];
 
-const MODE_META = {
-  hiragana: { label: 'Hiragana', script: 'あ', heroBg: 'あいうえお' },
-  katakana: { label: 'Katakana', script: 'ア', heroBg: 'アイウエオ' },
+const TABS = ['hiragana','katakana','numbers','time'];
+const TAB_META = {
+  hiragana: {icon:'あ', label:'Hiragana', heroBg:'あいうえお', heroTitle:'Hiragana',     heroSub:'Learn kana in blocks of 5'},
+  katakana: {icon:'ア', label:'Katakana', heroBg:'アイウエオ', heroTitle:'Katakana',     heroSub:'Learn kana in blocks of 5'},
+  numbers:  {icon:'一', label:'Numbers',  heroBg:'一二三四五', heroTitle:'Numbers',      heroSub:'Count in Japanese — progressive blocks'},
+  time:     {icon:'時', label:'Time',     heroBg:'一時二時',   heroTitle:'Telling Time', heroSub:'O\'clock hours in Japanese'},
 };
 
-// ── STATE ──────────────────────────────────────────────────────
-let currentMode       = 'hiragana';
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let currentTab        = 'hiragana';
 let currentBlockIndex = 0;
 let currentBlock      = [];
-let quizPhase         = 0; // 0 = char→rom, 1 = rom→char
+let quizPhase         = 0;   // 0 = MC recognition, 1 = typed production
 let cycleCount        = 0;
 let wordIndex         = 0;
-let attempts          = 0;
 let phaseOrder        = [];
-let reviewWords       = [], reviewIndex = 0, reviewCorrect = 0, reviewType = '';
-let quizCorrect       = 0, quizTotal = 0;
-let cycleHasMistake   = false; // any mistake in current cycle
-let quizPassed        = false; // both cycles completed without any mistake
+let quizCorrect       = 0;
+let quizTotal         = 0;
+let cycleHasMistake   = false;
+let quizPassed        = true;
+let reviewWords=[], reviewIndex=0, reviewCorrect=0, reviewType='';
 
-// ── PERSISTENCE ────────────────────────────────────────────────
-const getProgress  = () => JSON.parse(localStorage.getItem('kana_v1') || '{}');
-const saveProgress = p  => localStorage.setItem('kana_v1', JSON.stringify(p));
+// ═══════════════════════════════════════════════════════
+// PERSISTENCE
+// ═══════════════════════════════════════════════════════
+const getProgress  = () => JSON.parse(localStorage.getItem('jp_drill_v1') || '{}');
+const saveProgress = p  => localStorage.setItem('jp_drill_v1', JSON.stringify(p));
 
-// ── MASTERY HELPERS ────────────────────────────────────────────
-function getMasteryData(mode, blockIdx) {
+// ═══════════════════════════════════════════════════════
+// MASTERY
+// ═══════════════════════════════════════════════════════
+function pKey(tab, idx) { return `${tab}_${idx}`; }
+function getMD(tab, idx) { return getProgress()[pKey(tab,idx)] || {done:false,sessions:[]}; }
+function getMAvg(tab, idx) {
+  const d = getMD(tab,idx);
+  if (!d.sessions||!d.sessions.length) return 0;
+  const r = d.sessions.slice(-MASTERY_SESSIONS);
+  return r.reduce((a,s)=>a+s,0)/r.length;
+}
+function getML(tab, idx) {
+  const m = getMAvg(tab,idx);
+  return m>=MASTERY_T[2]?3:m>=MASTERY_T[1]?2:m>=MASTERY_T[0]?1:0;
+}
+function recordSession(tab, idx, acc) {
   const prog = getProgress();
-  const key  = `${mode}_${blockIdx}`;
-  return prog[key] || { done: false, sessions: [] };
-}
-
-function getMasteryLevel(mode, blockIdx) {
-  const d = getMasteryData(mode, blockIdx);
-  if (!d.sessions || d.sessions.length === 0) return 0;
-  const recent = d.sessions.slice(-MASTERY_SESSIONS);
-  const avg    = recent.reduce((a, s) => a + s, 0) / recent.length;
-  if (avg >= MASTERY_THRESHOLDS[2]) return 3;
-  if (avg >= MASTERY_THRESHOLDS[1]) return 2;
-  if (avg >= MASTERY_THRESHOLDS[0]) return 1;
-  return 0;
-}
-
-function getMasteryAvg(mode, blockIdx) {
-  const d = getMasteryData(mode, blockIdx);
-  if (!d.sessions || d.sessions.length === 0) return 0;
-  const recent = d.sessions.slice(-MASTERY_SESSIONS);
-  return recent.reduce((a, s) => a + s, 0) / recent.length;
-}
-
-function recordSession(mode, blockIdx, accuracy) {
-  const prog = getProgress();
-  const key  = `${mode}_${blockIdx}`;
-  if (!prog[key]) prog[key] = { done: true, sessions: [] };
-  prog[key].done = true;
-  prog[key].sessions = prog[key].sessions || [];
-  prog[key].sessions.push(accuracy);
+  const key  = pKey(tab,idx);
+  if (!prog[key]) prog[key]={done:false,sessions:[]};
+  prog[key].done=true;
+  prog[key].sessions=prog[key].sessions||[];
+  prog[key].sessions.push(acc);
   saveProgress(prog);
 }
 
-// ── HELPERS ────────────────────────────────────────────────────
-function isBlockUnlocked(mode, i, prog) {
-  if (i === 0) return true;
-  return !!(prog[`${mode}_${i-1}`]?.done);
-}
-
+// ═══════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════
 function shuffle(arr) {
-  return [...arr].map(v => ({ v, r: Math.random() })).sort((a, b) => a.r - b.r).map(o => o.v);
+  return [...arr].map(v=>({v,r:Math.random()})).sort((a,b)=>a.r-b.r).map(o=>o.v);
+}
+function isUnlocked(tab, idx) {
+  if (idx===0) return true;
+  return !!(getProgress()[pKey(tab,idx-1)]?.done);
+}
+function blocksFor(tab) {
+  if (tab==='hiragana'||tab==='katakana') {
+    const k=KANA[tab], n=Math.ceil(k.length/BLOCK_SIZE);
+    return Array.from({length:n},(_,i)=>({label:`Block ${i+1}`, preview:k[i*BLOCK_SIZE].char, items:k.slice(i*BLOCK_SIZE,(i+1)*BLOCK_SIZE)}));
+  }
+  if (tab==='numbers') return NUM_BLOCKS;
+  return TIME_BLOCKS;
+}
+function escQ(s){return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\\'");}
+function isKanaTab(){return currentTab==='hiragana'||currentTab==='katakana';}
+
+// ═══════════════════════════════════════════════════════
+// FONT TOGGLE
+// ═══════════════════════════════════════════════════════
+function setFont(style) {
+  document.body.classList.toggle('brush-font', style==='brush');
+  document.querySelectorAll('.ftbtn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.font===style);
+  });
+}
+function fontToggleHTML(defaultBrush) {
+  return `<div class="font-toggle">
+    <span class="font-toggle-label">Kana style</span>
+    <div class="font-toggle-btns">
+      <button class="ftbtn${defaultBrush?'':' active'}" data-font="clean" onclick="setFont('clean')">Clean</button>
+      <button class="ftbtn${defaultBrush?' active':''}" data-font="brush" onclick="setFont('brush')">Brush</button>
+    </div>
+  </div>`;
 }
 
-function getDistractors(current, allKana, count) {
-  const pool = allKana.filter(k => k.char !== current.char);
-  return shuffle(pool).slice(0, count);
+// ═══════════════════════════════════════════════════════
+// CLOCK SVG
+// ═══════════════════════════════════════════════════════
+function clockSVG(hour, size) {
+  const cx=size/2, cy=size/2, r=size/2-4;
+  const ha = (hour%12)/12*2*Math.PI - Math.PI/2;
+  const hx = cx+r*0.55*Math.cos(ha), hy = cy+r*0.55*Math.sin(ha);
+  const mx = cx, my = cy-r*0.75;
+  let ticks='';
+  for(let i=0;i<12;i++){
+    const a=i/12*2*Math.PI;
+    const x1=cx+r*0.82*Math.cos(a), y1=cy+r*0.82*Math.sin(a);
+    const x2=cx+r*Math.cos(a),      y2=cy+r*Math.sin(a);
+    ticks+=`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#c9a84c" stroke-width="${i%3===0?2:1}"/>`;
+  }
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="display:block;margin:0 auto 4px">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="#1a1a2e" stroke="#c9a84c" stroke-width="2"/>
+    ${ticks}
+    <line x1="${cx}" y1="${cy}" x2="${hx.toFixed(1)}" y2="${hy.toFixed(1)}" stroke="#f5f0e8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="${cx}" y1="${cy}" x2="${mx}" y2="${my.toFixed(1)}" stroke="#f5f0e8" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="${cx}" cy="${cy}" r="3" fill="#c9a84c"/>
+  </svg>`;
 }
 
-// ── SCREEN MANAGER ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// SCREEN MANAGER
+// ═══════════════════════════════════════════════════════
 function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + id).classList.add('active');
-  if (id === 'home') { renderHome(); setFont('clean', null); }
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  if (id==='home') { setFont('clean'); renderHome(); }
 }
 
-// ── HOME ────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// HOME
+// ═══════════════════════════════════════════════════════
+function switchTab(tab) { currentTab=tab; renderHome(); }
+
 function renderHome() {
-  const prog  = getProgress();
-  const kana  = KANA[currentMode];
-  const n     = Math.ceil(kana.length / BLOCK_SIZE);
-  const meta  = MODE_META[currentMode];
+  const prog   = getProgress();
+  const meta   = TAB_META[currentTab];
+  const blocks = blocksFor(currentTab);
+  const n      = blocks.length;
 
-  let done = 0, mastered = 0;
-  for (let i = 0; i < n; i++) {
-    if (prog[`${currentMode}_${i}`]?.done) done++;
-    if (getMasteryLevel(currentMode, i) === 3) mastered++;
+  let done=0, mastered=0;
+  for(let i=0;i<n;i++){
+    if(prog[pKey(currentTab,i)]?.done) done++;
+    if(getML(currentTab,i)===3) mastered++;
   }
+  const totalItems = isKanaTab() ? KANA[currentTab].length : blocks.reduce((a,b)=>a+b.items.length,0);
 
-  document.getElementById('hero-bg').textContent         = meta.heroBg;
-  document.getElementById('hero-title').textContent      = meta.label;
-  document.getElementById('home-mode-label').textContent = meta.label;
-  document.getElementById('stat-complete').textContent   = done;
-  document.getElementById('stat-mastered').textContent   = mastered;
-  document.getElementById('stat-total').textContent      = kana.length;
+  document.getElementById('hero-bg').textContent          = meta.heroBg;
+  document.getElementById('hero-title').textContent       = meta.heroTitle;
+  document.getElementById('hero-sub').textContent         = meta.heroSub;
+  document.getElementById('home-mode-label').textContent  = meta.label;
+  document.getElementById('stat-complete').textContent    = done;
+  document.getElementById('stat-mastered').textContent    = mastered;
+  document.getElementById('stat-total').textContent       = totalItems;
 
-  // mode tabs
-  const tabsEl = document.getElementById('mode-tabs-container');
-  tabsEl.innerHTML = '<div class="mode-tabs">' +
-    ['hiragana','katakana'].map(m => {
-      const active = m === currentMode;
-      return `<button class="mode-tab ${active ? 'active' : ''}" onclick="switchMode('${m}')">
-        <span class="tab-script">${MODE_META[m].script}</span>
-        <span>${MODE_META[m].label}</span>
-      </button>`;
-    }).join('') + '</div>';
+  // top tabs
+  document.getElementById('top-tabs-container').innerHTML =
+    `<div class="top-tabs">${TABS.map(t=>`<button class="top-tab${t===currentTab?' active':''}" onclick="switchTab('${t}')">
+      <span class="ti">${TAB_META[t].icon}</span><span>${TAB_META[t].label}</span>
+    </button>`).join('')}</div>`;
 
-  // mastery progress banner (if any blocks started)
+  // mastery banner
   const bannerEl = document.getElementById('mastery-banner-container');
-  if (done > 0) {
-    const totalSessions = Array.from({length: n}, (_,i) => getMasteryData(currentMode,i).sessions?.length || 0).reduce((a,b)=>a+b,0);
-    const avgMastery    = done > 0 ? Array.from({length:done},(_,i)=>getMasteryAvg(currentMode,i)).reduce((a,b)=>a+b,0)/done : 0;
-    const pct           = Math.round(avgMastery * 100);
-    bannerEl.innerHTML  = `
-      <div class="mastery-banner">
-        <h3>Mastery Progress — ${meta.label}</h3>
-        <div class="mastery-track"><div class="mastery-fill" style="width:${pct}%"></div></div>
-        <div class="mastery-label">${pct}% avg accuracy across ${done} block${done!==1?'s':''} · ${mastered} mastered</div>
-        <div class="mastery-stars">${[0,1,2].map(i=>`<div class="mastery-star${mastered>i?' lit':''}"></div>`).join('')}</div>
-      </div>`;
-  } else {
-    bannerEl.innerHTML = '';
-  }
+  if(done>0){
+    const avg = Array.from({length:done},(_,i)=>getMAvg(currentTab,i)).reduce((a,b)=>a+b,0)/done;
+    const pct = Math.round(avg*100);
+    bannerEl.innerHTML=`<div class="mastery-banner">
+      <h3>Mastery — ${meta.label}</h3>
+      <div class="mastery-track"><div class="mastery-fill" style="width:${pct}%"></div></div>
+      <div class="mastery-label">${pct}% avg · ${done} block${done!==1?'s':''} done · ${mastered} mastered</div>
+      <div class="mastery-stars">${[0,1,2].map(i=>`<div class="mastery-star${mastered>i?' lit':''}"></div>`).join('')}</div>
+    </div>`;
+  } else { bannerEl.innerHTML=''; }
 
   // block grid
-  const grid = document.getElementById('block-grid');
-  grid.innerHTML = '';
-  for (let i = 0; i < n; i++) {
-    const d       = prog[`${currentMode}_${i}`];
-    const isDone  = !!d?.done;
-    const open    = isBlockUnlocked(currentMode, i, prog);
-    const ml      = isDone ? getMasteryLevel(currentMode, i) : 0;
-    const isMast  = ml === 3;
-    const firstChar = kana[i * BLOCK_SIZE].char;
-    const btn     = document.createElement('button');
-    btn.className = `block-btn ${open ? 'unlocked' : 'locked'} ${isMast ? 'mastered' : isDone ? 'complete' : ''}`;
-    btn.innerHTML = `<span class="bn">${i+1}</span><span class="bk">${firstChar}</span><span style="font-size:9px">${isMast ? '★' : isDone ? '✓' : open ? '○' : '🔒'}</span>`;
-    btn.disabled  = !open;
-    if (open) btn.onclick = () => openBlock(i);
-    grid.appendChild(btn);
-  }
+  const gridCls = isKanaTab()?'block-grid': currentTab==='time'?'block-grid-3':'block-grid-4';
+  let html=`<div class="${gridCls}">`;
+  blocks.forEach((block,i)=>{
+    const isDone = !!prog[pKey(currentTab,i)]?.done;
+    const open   = isUnlocked(currentTab,i);
+    const ml     = isDone?getML(currentTab,i):0;
+    const cls    = `block-btn${open?' unlocked':'  locked'}${ml===3?' mastered':isDone?' complete':''}`;
+    const icon   = ml===3?'★':isDone?'✓':open?'○':'🔒';
+    html+=`<button class="${cls}" ${open?`onclick="openBlock(${i})"`:''} ${open?'':'disabled'}>
+      <span class="bn">${block.label}</span>
+      <span class="bk">${block.preview}</span>
+      <span class="bs">${icon}</span>
+    </button>`;
+  });
+  html+='</div>';
+  document.getElementById('block-grid-container').innerHTML=html;
 
-  // review section
-  const reviewHeading = document.getElementById('review-heading');
-  const reviewRow     = document.getElementById('review-row');
-  if (done === 0) { reviewHeading.style.display = 'none'; reviewRow.innerHTML = ''; return; }
-  reviewHeading.style.display = '';
+  // review row
+  const rh=document.getElementById('review-heading');
+  const rr=document.getElementById('review-row');
+  if(done===0){rh.style.display='none';rr.innerHTML='';return;}
+  rh.style.display='';
+  const enough=done>=2;
+  const lCls=enough?'':' review-btn-locked';
+  const lEl=enough?'':'<span class="review-lock">🔒 Complete 2 blocks first</span>';
 
-  const enough  = done >= 2; // need 2 blocks (10 kana) for review
-  const lockCls = enough ? '' : ' review-btn-locked';
-  const lockEl  = enough ? '' : '<span class="review-lock">🔒 Complete 2 blocks first</span>';
-  const s       = currentMode === 'hiragana' ? 'あ' : 'ア';
-
-  reviewRow.innerHTML = `
-    <div class="review-grid-2">
-      <button class="review-btn${lockCls}" onclick="${enough ? "startReview('char-rom')" : ''}">
-        <span class="ri">${s}→ ro</span>Kana → Romaji${lockEl}
-      </button>
-      <button class="review-btn${lockCls}" onclick="${enough ? "startReview('rom-char')" : ''}">
-        <span class="ri">ro→${s}</span>Romaji → Kana${lockEl}
-      </button>
+  if(isKanaTab()){
+    const s=currentTab==='hiragana'?'あ':'ア';
+    rr.innerHTML=`<div class="review-grid-2">
+      <button class="review-btn${lCls}" onclick="${enough?"startReview('char-rom')":""}">
+        <span class="ri">${s}→ro</span>Kana → Romaji${lEl}</button>
+      <button class="review-btn${lCls}" onclick="${enough?"startReview('rom-char')":""}">
+        <span class="ri">ro→${s}</span>Romaji → Kana${lEl}</button>
     </div>`;
+  } else if(currentTab==='numbers'){
+    rr.innerHTML=`<div class="review-grid-2">
+      <button class="review-btn${lCls}" onclick="${enough?"startReview('num-jp')":""}">
+        <span class="ri">123→字</span>Number → Japanese${lEl}</button>
+      <button class="review-btn${lCls}" onclick="${enough?"startReview('jp-num')":""}">
+        <span class="ri">字→123</span>Japanese → Number${lEl}</button>
+    </div>`;
+  } else {
+    rr.innerHTML=`<div class="review-grid-2">
+      <button class="review-btn${lCls}" onclick="${enough?"startReview('time-jp')":""}">
+        <span class="ri">🕐→字</span>Clock → Japanese${lEl}</button>
+      <button class="review-btn${lCls}" onclick="${enough?"startReview('jp-time')":""}">
+        <span class="ri">字→ro</span>Japanese → Romaji${lEl}</button>
+    </div>`;
+  }
 }
 
-function switchMode(m) { currentMode = m; renderHome(); }
-
-// ── STUDY SCREEN ────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// STUDY SCREEN
+// ═══════════════════════════════════════════════════════
 function openBlock(i) {
-  currentBlockIndex = i;
-  const kana        = KANA[currentMode];
-  currentBlock      = kana.slice(i * BLOCK_SIZE, (i + 1) * BLOCK_SIZE);
-  quizCorrect = 0; quizTotal = 0;
+  currentBlockIndex=i;
+  const blocks=blocksFor(currentTab);
+  currentBlock=blocks[i].items;
+  quizCorrect=0; quizTotal=0;
 
-  document.getElementById('study-title').textContent    = 'Block ' + (i + 1);
-  document.getElementById('study-subtitle').textContent = MODE_META[currentMode].label + ' · ' + currentBlock.length + ' kana';
+  document.getElementById('study-title').textContent    = blocks[i].label;
+  document.getElementById('study-subtitle').textContent = TAB_META[currentTab].label+' · '+currentBlock.length+' items';
+  document.getElementById('study-heading').textContent  = isKanaTab()?'Study these kana':currentTab==='numbers'?'Study these numbers':'Study these times';
+  document.getElementById('study-font-toggle').innerHTML= isKanaTab()?fontToggleHTML(false):'';
+  if(isKanaTab()) setFont('clean');
 
-  const cards = document.getElementById('study-cards');
-  cards.innerHTML = '';
-  currentBlock.forEach(k => {
-    const d  = document.createElement('div');
-    d.className = 'study-card';
-    d.innerHTML = `<div class="study-char">${k.char}</div><div class="study-rom">${k.rom}</div><div class="study-hint">${k.hint}</div>`;
-    cards.appendChild(d);
-  });
+  let cards='';
+  if(isKanaTab()){
+    cards=`<div class="study-grid">${currentBlock.map(k=>`<div class="study-card">
+      <div class="study-char">${k.char}</div>
+      <div class="study-rom">${k.rom}</div>
+      <div class="study-hint">${k.hint}</div>
+    </div>`).join('')}</div>`;
+  } else if(currentTab==='numbers'){
+    cards=`<div class="study-grid-num">${currentBlock.map(item=>`<div class="study-card-num">
+      <div class="sn-digit">${item.n.toLocaleString()}</div>
+      <div class="sn-jp">${item.jp}</div>
+      <div class="sn-rom">${item.rom}</div>
+      ${item.hint?`<div class="sn-hint">${item.hint}</div>`:''}
+    </div>`).join('')}</div>`;
+  } else {
+    cards=`<div class="study-grid-num">${currentBlock.map(item=>`<div class="study-card-num">
+      ${clockSVG(item.hour,70)}
+      <div class="sn-jp">${item.jp}</div>
+      <div class="sn-rom">${item.rom}</div>
+    </div>`).join('')}</div>`;
+  }
+  document.getElementById('study-cards').innerHTML=cards;
   showScreen('study');
 }
 
-// ── QUIZ ────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// QUIZ
+// ═══════════════════════════════════════════════════════
 function beginQuiz() {
-  quizPhase  = 0;
-  cycleCount = 0;
-  wordIndex  = 0;
-  attempts   = 0;
-  quizCorrect = 0;
-  quizTotal   = 0;
-  cycleHasMistake = false;
-  quizPassed      = true; // innocent until proven guilty
-  phaseOrder  = shuffle(currentBlock);
+  quizPhase=0; cycleCount=0; wordIndex=0;
+  quizCorrect=0; quizTotal=0;
+  cycleHasMistake=false; quizPassed=true;
+  phaseOrder=shuffle(currentBlock);
 
-  document.getElementById('quiz-card-area').innerHTML = `
+  document.getElementById('quiz-card-area').innerHTML=`
     <div class="quiz-meta">
       <span class="quiz-phase-label" id="quiz-phase-label">Cycle 1</span>
       <div style="display:flex;align-items:center;gap:8px">
-        <span id="clean-indicator" style="font-size:10px;font-weight:700;letter-spacing:.08em;color:#27ae60">● CLEAN</span>
+        <span id="clean-ind" style="font-size:10px;font-weight:700;letter-spacing:.08em;color:#27ae60">● CLEAN</span>
         <div class="cycle-dots" id="cycle-dots"></div>
       </div>
     </div>
     <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
-    <div class="font-toggle">
-      <span class="font-toggle-label">Kana style</span>
-      <div class="font-toggle-btns">
-        <button class="ftbtn ${!document.body.classList.contains('brush-font')?'active':''}" id="quiz-ft-clean" onclick="setFont('clean','quiz')">Clean</button>
-        <button class="ftbtn ${document.body.classList.contains('brush-font')?'active':''}" id="quiz-ft-brush" onclick="setFont('brush','quiz')">Brush</button>
-      </div>
-    </div>
+    ${isKanaTab()?fontToggleHTML(false):''}
     <div class="question-card" id="question-card"></div>
-    <div class="choices-grid" id="choices-grid"></div>
+    <div id="answer-area"></div>
     <div class="feedback-area"><div class="feedback-pill" id="feedback-pill"></div></div>`;
 
+  if(isKanaTab()) setFont('clean');
   showScreen('quiz');
   renderQuizFrame();
 }
 
 function renderQuizFrame() {
-  document.getElementById('quiz-block-label').textContent = 'Block ' + (currentBlockIndex + 1);
-  document.getElementById('quiz-mode-label').textContent  = MODE_META[currentMode].label;
-
-  // cycle dots
-  const dots = document.getElementById('cycle-dots');
-  dots.innerHTML = '';
-  for (let i = 0; i < REQUIRED_CYCLES; i++) {
-    const d = document.createElement('div');
-    d.className = 'cycle-dot ' + (i < cycleCount ? 'done' : i === cycleCount ? 'active' : '');
+  const blocks=blocksFor(currentTab);
+  document.getElementById('quiz-block-label').textContent = blocks[currentBlockIndex].label;
+  document.getElementById('quiz-mode-label').textContent  = TAB_META[currentTab].label;
+  const dots=document.getElementById('cycle-dots');
+  dots.innerHTML='';
+  for(let i=0;i<REQUIRED_CYCLES;i++){
+    const d=document.createElement('div');
+    d.className='cycle-dot'+(i<cycleCount?' done':i===cycleCount?' active':'');
     dots.appendChild(d);
   }
-
   showQuestion();
 }
 
-// Phase 0 = char → rom (multiple choice romaji), Phase 1 = rom → char (multiple choice character)
 function showQuestion() {
-  const w   = phaseOrder[wordIndex];
-  const kana = KANA[currentMode];
-
-  // Progress bar
-  const totalSteps = currentBlock.length * 2 * REQUIRED_CYCLES;
-  const doneSteps  = cycleCount * currentBlock.length * 2 + quizPhase * currentBlock.length + wordIndex;
-  document.getElementById('progress-fill').style.width = Math.min((doneSteps / totalSteps) * 100, 99) + '%';
-
-  const cycleLabels = ['With hints', 'No hints'];
-  document.getElementById('quiz-phase-label').textContent = `Cycle ${cycleCount+1}/2 · ${cycleLabels[cycleCount]}`;
-
-  const qCard = document.getElementById('question-card');
-  const choicesEl = document.getElementById('choices-grid');
+  const item=phaseOrder[wordIndex];
+  const total=currentBlock.length*2*REQUIRED_CYCLES;
+  const done =cycleCount*currentBlock.length*2+quizPhase*currentBlock.length+wordIndex;
+  document.getElementById('progress-fill').style.width=Math.min(done/total*100,99)+'%';
+  document.getElementById('quiz-phase-label').textContent=
+    `Cycle ${cycleCount+1}/2 · ${cycleCount===0?'With hints':'No hints'} · ${quizPhase===0?'Recognition':'Production'}`;
   clearFeedback();
+  buildQuestion(item);
+}
 
-  // Build question and choices
-  if (quizPhase === 0) {
-    // CHAR → ROM: show character, pick romaji
-    let promptHtml = `<div class="q-label">What is the reading?</div><div class="q-kana">${w.char}</div>`;
-    if (cycleCount === 0) promptHtml += `<div class="q-hint">${w.hint}</div>`;
-    qCard.innerHTML = promptHtml;
+function buildQuestion(item) {
+  const qCard=document.getElementById('question-card');
+  const aEl  =document.getElementById('answer-area');
+  const hint =cycleCount===0;
 
-    const distractors = getDistractors(w, kana, 3);
-    const choices     = shuffle([{ rom: w.rom, correct: true }, ...distractors.map(k => ({ rom: k.rom, correct: false }))]);
-    choicesEl.innerHTML = choices.map(c =>
-      `<button class="choice-btn rom" onclick="checkChoice(this, ${c.correct})">${c.rom}</button>`
-    ).join('');
+  if(quizPhase===0) {
+    // ── RECOGNITION (MC) ──
+    if(isKanaTab()){
+      qCard.innerHTML=`<div class="q-label">What is the reading?</div>
+        <div class="q-kana">${item.char}</div>
+        ${hint?`<div class="q-hint">${item.hint}</div>`:''}`;
+      const pool=shuffle(KANA[currentTab].filter(k=>k.rom!==item.rom)).slice(0,3);
+      const choices=shuffle([{val:item.rom,ok:true},...pool.map(k=>({val:k.rom,ok:false}))]);
+      aEl.innerHTML=`<div class="choices-grid">${choices.map(c=>
+        `<button class="choice-btn rom" onclick="checkMC(this,${c.ok})">${c.val}</button>`
+      ).join('')}</div>`;
+
+    } else if(currentTab==='numbers'){
+      qCard.innerHTML=`<div class="q-label">How do you say this?</div>
+        <div class="q-number">${item.n.toLocaleString()}</div>
+        ${hint&&item.hint?`<div class="q-hint">${item.hint}</div>`:''}`;
+      const pool=shuffle(NUM_ITEMS.filter(x=>x.jp!==item.jp)).slice(0,3);
+      const choices=shuffle([{val:item.jp,ok:true},...pool.map(x=>({val:x.jp,ok:false}))]);
+      aEl.innerHTML=`<div class="choices-grid">${choices.map(c=>
+        `<button class="choice-btn jpnum" onclick="checkMC(this,${c.ok})">${c.val}</button>`
+      ).join('')}</div>`;
+
+    } else {
+      qCard.innerHTML=`<div class="q-label">What time is this?</div>${clockSVG(item.hour,120)}`;
+      const pool=shuffle(TIME_ITEMS.filter(t=>t.jp!==item.jp)).slice(0,3);
+      const choices=shuffle([{val:item.jp,ok:true},...pool.map(t=>({val:t.jp,ok:false}))]);
+      aEl.innerHTML=`<div class="choices-grid">${choices.map(c=>
+        `<button class="choice-btn jpnum" onclick="checkMC(this,${c.ok})">${c.val}</button>`
+      ).join('')}</div>`;
+    }
+
   } else {
-    // ROM → CHAR: show romaji, pick character
-    let promptHtml = `<div class="q-label">Which character?</div><div class="q-romaji">${w.rom}</div>`;
-    if (cycleCount === 0) promptHtml += `<div class="q-hint">${w.hint}</div>`;
-    qCard.innerHTML = promptHtml;
-
-    const distractors = getDistractors(w, kana, 3);
-    const choices     = shuffle([{ char: w.char, correct: true }, ...distractors.map(k => ({ char: k.char, correct: false }))]);
-    choicesEl.innerHTML = choices.map(c =>
-      `<button class="choice-btn" onclick="checkChoice(this, ${c.correct})">${c.char}</button>`
-    ).join('');
+    // ── PRODUCTION (typed) ──
+    let prompt='', correct='', ph='';
+    if(isKanaTab()){
+      prompt=`<div class="q-label">Type the romaji</div><div class="q-kana">${item.char}</div>`;
+      correct=item.rom; ph='Type romaji…';
+    } else if(currentTab==='numbers'){
+      prompt=`<div class="q-label">How do you read this?</div>
+        <div class="q-jp">${item.jp}</div>
+        ${hint&&item.hint?`<div class="q-hint">${item.hint}</div>`:''}`;
+      correct=item.rom; ph='Type romaji…';
+    } else {
+      prompt=`<div class="q-label">Type the Japanese reading</div>${clockSVG(item.hour,110)}`;
+      correct=item.rom; ph='e.g. ichiji…';
+    }
+    qCard.innerHTML=prompt;
+    const safe=escQ(correct);
+    aEl.innerHTML=`<input class="answer-input" id="ans-input" type="text"
+      autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+      placeholder="${ph}"/>
+      <button class="submit-btn" onclick="checkTyped('${safe}')">Submit</button>`;
+    setTimeout(()=>{
+      const el=document.getElementById('ans-input');
+      if(el){
+        el.focus();
+        el.addEventListener('keydown',e=>{if(e.key==='Enter')checkTyped(safe);});
+      }
+    },80);
   }
 }
 
-function checkChoice(btn, isCorrect) {
-  const allBtns = document.querySelectorAll('.choice-btn');
-  allBtns.forEach(b => b.disabled = true);
+function checkMC(btn, ok) {
+  document.querySelectorAll('#answer-area .choice-btn').forEach(b=>b.disabled=true);
   quizTotal++;
-
-  if (isCorrect) {
+  if(ok){
     btn.classList.add('correct');
-    showFeedback('correct', '✓ Correct!');
+    showFeedback('correct','✓ Correct!');
     quizCorrect++;
-    setTimeout(nextWord, 700);
+    setTimeout(nextWord,700);
   } else {
     btn.classList.add('wrong');
-    cycleHasMistake = true;
-    quizPassed      = false;
-    // Flip the clean indicator
-    const ind = document.getElementById('clean-indicator');
-    if (ind) { ind.textContent = '✗ MISTAKE'; ind.style.color = '#c0392b'; }
-    // Reveal the correct answer
-    allBtns.forEach(b => {
-      if (b.textContent === phaseOrder[wordIndex].char || b.textContent === phaseOrder[wordIndex].rom)
-        b.classList.add('correct');
+    markMistake();
+    const item=phaseOrder[wordIndex];
+    const correctVal=quizPhase===0?(item.jp||item.char):item.rom;
+    document.querySelectorAll('#answer-area .choice-btn').forEach(b=>{
+      if(b.textContent.trim()===correctVal) b.classList.add('correct');
     });
-    showFeedback('reveal', '✗ ' + (quizPhase === 0 ? phaseOrder[wordIndex].rom : phaseOrder[wordIndex].char));
-    setTimeout(nextWord, 1600);
+    showFeedback('reveal','✗ '+correctVal);
+    setTimeout(nextWord,1600);
   }
 }
 
-function clearFeedback() {
-  const p = document.getElementById('feedback-pill');
-  if (p) { p.className = 'feedback-pill'; p.textContent = ''; }
-}
-
-function showFeedback(type, msg) {
-  const p = document.getElementById('feedback-pill');
-  if (p) { p.className = 'feedback-pill ' + type + ' show'; p.textContent = msg; }
-}
-
-function nextWord() {
-  wordIndex++;
-  if (wordIndex < phaseOrder.length) { showQuestion(); return; }
-
-  // next phase within this cycle
-  quizPhase++;
-  if (quizPhase < 2) {
-    wordIndex = 0; phaseOrder = shuffle(currentBlock);
-    renderQuizFrame(); return;
-  }
-
-  // completed both phases — end of cycle
-  quizPhase = 0; cycleCount++;
-  cycleHasMistake = false; // reset for next cycle
-  if (cycleCount < REQUIRED_CYCLES) {
-    wordIndex = 0; phaseOrder = shuffle(currentBlock);
-    renderQuizFrame();
+function checkTyped(correct) {
+  const inp=document.getElementById('ans-input');
+  if(!inp) return;
+  const val=inp.value.trim().toLowerCase();
+  const alts=correct.toLowerCase().split('/').map(s=>s.trim());
+  const ok=alts.includes(val);
+  quizTotal++;
+  inp.disabled=true;
+  document.querySelector('#quiz-card-area .submit-btn').disabled=true;
+  if(ok){
+    inp.className='answer-input correct';
+    showFeedback('correct','✓ Correct!');
+    quizCorrect++;
+    setTimeout(nextWord,900);
   } else {
-    blockComplete();
+    inp.className='answer-input wrong';
+    markMistake();
+    showFeedback('reveal','✗ '+correct);
+    setTimeout(nextWord,1800);
   }
 }
 
-function blockComplete() {
-  const accuracy   = quizTotal > 0 ? quizCorrect / quizTotal : 0;
-  const kana       = KANA[currentMode];
-  const numBlocks  = Math.ceil(kana.length / BLOCK_SIZE);
-  const isLast     = currentBlockIndex + 1 >= numBlocks;
+function markMistake(){
+  cycleHasMistake=true; quizPassed=false;
+  const el=document.getElementById('clean-ind');
+  if(el){el.textContent='✗ MISTAKE';el.style.color='#c0392b';}
+}
+function clearFeedback(){
+  const p=document.getElementById('feedback-pill');
+  if(p){p.className='feedback-pill';p.textContent='';}
+}
+function showFeedback(type,msg){
+  const p=document.getElementById('feedback-pill');
+  if(p){p.className=`feedback-pill ${type} show`;p.textContent=msg;}
+}
 
-  document.getElementById('progress-fill').style.width = '100%';
+function nextWord(){
+  wordIndex++;
+  if(wordIndex<phaseOrder.length){showQuestion();return;}
+  quizPhase++;
+  if(quizPhase<2){wordIndex=0;phaseOrder=shuffle(currentBlock);renderQuizFrame();return;}
+  quizPhase=0;cycleCount++;cycleHasMistake=false;
+  if(cycleCount<REQUIRED_CYCLES){wordIndex=0;phaseOrder=shuffle(currentBlock);renderQuizFrame();}
+  else blockComplete();
+}
 
-  if (quizPassed) {
-    // Clean pass — mark done and record session
-    recordSession(currentMode, currentBlockIndex, accuracy);
-    const ml       = getMasteryLevel(currentMode, currentBlockIndex);
-    const d        = getMasteryData(currentMode, currentBlockIndex);
-    const sessions = d.sessions || [];
-    const needed   = Math.max(0, MASTERY_SESSIONS - sessions.length);
+function blockComplete(){
+  const acc    = quizTotal>0?quizCorrect/quizTotal:0;
+  const blocks = blocksFor(currentTab);
+  const isLast = currentBlockIndex+1>=blocks.length;
+  document.getElementById('progress-fill').style.width='100%';
 
-    let masteryNote = '';
-    if (ml === 3) masteryNote = 'This block is mastered!';
-    else if (needed > 0) masteryNote = `${needed} more perfect run${needed!==1?'s':''} to unlock mastery`;
-    else masteryNote = `${Math.round(MASTERY_THRESHOLDS[2]*100)}% avg needed — keep going`;
+  if(quizPassed){
+    recordSession(currentTab,currentBlockIndex,acc);
+    const ml    = getML(currentTab,currentBlockIndex);
+    const d     = getMD(currentTab,currentBlockIndex);
+    const needed= Math.max(0,MASTERY_SESSIONS-(d.sessions||[]).length);
+    const mNote = ml===3?'Block mastered!':
+      needed>0?`${needed} more perfect run${needed!==1?'s':''} to unlock mastery`:
+      `${Math.round(MASTERY_T[2]*100)}% avg needed — keep going`;
+    const nextBtn=!isLast?`<button class="complete-btn" onclick="openBlock(${currentBlockIndex+1})">Next: ${blocks[currentBlockIndex+1].label} →</button>`:'';
 
-    let primaryBtn = '';
-    if (!isLast) primaryBtn = `<button class="complete-btn" onclick="openBlock(${currentBlockIndex+1})">Next: Block ${currentBlockIndex+2} →</button>`;
-
-    document.getElementById('quiz-card-area').innerHTML = `
+    document.getElementById('quiz-card-area').innerHTML=`
       <div class="complete-card">
         <div class="big-emoji">★</div>
-        <h2>Block ${currentBlockIndex+1} cleared!</h2>
+        <h2>${blocks[currentBlockIndex].label} cleared!</h2>
         <p>Both cycles — no mistakes</p>
         <div class="mastery-result">
           <div class="mr-label">Mastery</div>
           <div class="mr-stars">${[0,1,2].map(i=>`<div class="mr-star${ml>i?' lit':''}"></div>`).join('')}</div>
-          <div class="mr-note">${masteryNote}</div>
+          <div class="mr-note">${mNote}</div>
         </div>
-        ${primaryBtn}
+        ${nextBtn}
         <button class="complete-btn" onclick="beginQuiz()">Drill Again ↺</button>
         <button class="complete-btn secondary" onclick="showScreen('home')">Back to Home</button>
       </div>`;
   } else {
-    // Had mistakes — can't unlock, must retry
-    const wrong = quizTotal - quizCorrect;
-    document.getElementById('quiz-card-area').innerHTML = `
+    const wrong=quizTotal-quizCorrect;
+    document.getElementById('quiz-card-area').innerHTML=`
       <div class="complete-card">
         <div class="big-emoji">📚</div>
         <h2>Not quite!</h2>
@@ -812,124 +939,153 @@ function blockComplete() {
   }
 }
 
-function confirmQuit() {
-  if (confirm('Quit this quiz? Your progress in this session will be lost.')) showScreen('home');
+function confirmQuit(){
+  if(confirm('Quit this quiz? Progress in this session will be lost.')) showScreen('home');
 }
 
-// ── REVIEW ──────────────────────────────────────────────────────
-function startReview(type) {
-  const prog  = getProgress();
-  const kana  = KANA[currentMode];
-  const n     = Math.ceil(kana.length / BLOCK_SIZE);
-  const pool  = [];
-  for (let i = 0; i < n; i++) {
-    if (prog[`${currentMode}_${i}`]?.done)
-      pool.push(...kana.slice(i * BLOCK_SIZE, (i+1) * BLOCK_SIZE));
-  }
-  if (pool.length < 10) { alert('Complete at least 2 blocks to unlock review!'); return; }
+// ═══════════════════════════════════════════════════════
+// REVIEW
+// ═══════════════════════════════════════════════════════
+function startReview(type){
+  const prog=getProgress();
+  const blocks=blocksFor(currentTab);
+  const pool=[];
+  blocks.forEach((b,i)=>{if(prog[pKey(currentTab,i)]?.done)pool.push(...b.items);});
+  if(pool.length<4){alert('Complete at least 2 blocks to unlock review!');return;}
 
-  reviewType    = type;
-  reviewWords   = shuffle(pool).slice(0, 10);
-  reviewIndex   = 0;
-  reviewCorrect = 0;
+  reviewType=type; reviewWords=shuffle(pool).slice(0,10);
+  reviewIndex=0; reviewCorrect=0;
 
-  const typeLabel = type === 'char-rom' ? 'Kana → Romaji' : 'Romaji → Kana';
-  document.getElementById('review-subtitle').textContent = typeLabel + ' · 10 kana';
+  document.getElementById('review-subtitle').textContent=type+' · '+reviewWords.length+' items';
+  document.getElementById('review-font-toggle').innerHTML=isKanaTab()?fontToggleHTML(true):'';
+  if(isKanaTab()) setFont('brush'); else setFont('clean');
+
   showScreen('review');
-  // Default review to brush font for extra challenge
-  setFont('brush', 'review');
   showReviewQ();
 }
 
-function showReviewQ() {
-  const w    = reviewWords[reviewIndex];
-  const kana = KANA[currentMode];
-  const area = document.getElementById('review-content');
+function showReviewQ(){
+  const item=reviewWords[reviewIndex];
+  const el=document.getElementById('review-content');
 
-  const isCharRom = reviewType === 'char-rom';
-  const prompt    = isCharRom
-    ? `<div class="q-label">What is the reading?</div><div class="q-kana">${w.char}</div>`
-    : `<div class="q-label">Which character?</div><div class="q-romaji">${w.rom}</div>`;
+  let prompt='', answer='';
 
-  const distractors  = getDistractors(w, kana, 3);
-  const choices      = isCharRom
-    ? shuffle([{ val: w.rom, correct: true }, ...distractors.map(k => ({ val: k.rom, correct: false }))])
-    : shuffle([{ val: w.char, correct: true }, ...distractors.map(k => ({ val: k.char, correct: false }))]);
+  if(reviewType==='char-rom'){
+    prompt=`<div class="q-label">What is the reading?</div><div class="q-kana">${item.char}</div>`;
+    const pool=shuffle(KANA[currentTab].filter(k=>k.rom!==item.rom)).slice(0,3);
+    const choices=shuffle([{val:item.rom,ok:true},...pool.map(k=>({val:k.rom,ok:false}))]);
+    answer=`<div class="choices-grid">${choices.map(c=>`<button class="choice-btn rom" onclick="checkRev(this,${c.ok},'${escQ(item.rom)}')">${c.val}</button>`).join('')}</div>`;
 
-  const btnClass = isCharRom ? 'choice-btn rom' : 'choice-btn';
+  } else if(reviewType==='rom-char'){
+    prompt=`<div class="q-label">Which character?</div><div class="q-romaji">${item.rom}</div>`;
+    const pool=shuffle(KANA[currentTab].filter(k=>k.char!==item.char)).slice(0,3);
+    const choices=shuffle([{val:item.char,ok:true},...pool.map(k=>({val:k.char,ok:false}))]);
+    answer=`<div class="choices-grid">${choices.map(c=>`<button class="choice-btn" onclick="checkRev(this,${c.ok},'${escQ(item.char)}')">${c.val}</button>`).join('')}</div>`;
 
-  area.innerHTML = `
+  } else if(reviewType==='num-jp'){
+    prompt=`<div class="q-label">How do you say this?</div><div class="q-number">${item.n.toLocaleString()}</div>`;
+    const pool=shuffle(NUM_ITEMS.filter(x=>x.jp!==item.jp)).slice(0,3);
+    const choices=shuffle([{val:item.jp,ok:true},...pool.map(x=>({val:x.jp,ok:false}))]);
+    answer=`<div class="choices-grid">${choices.map(c=>`<button class="choice-btn jpnum" onclick="checkRev(this,${c.ok},'${escQ(item.jp)}')">${c.val}</button>`).join('')}</div>`;
+
+  } else if(reviewType==='jp-num'){
+    prompt=`<div class="q-label">What number is this?</div><div class="q-jp">${item.jp}</div>`;
+    const pool=shuffle(NUM_ITEMS.filter(x=>x.n!==item.n)).slice(0,3);
+    const choices=shuffle([{val:item.n,ok:true},...pool.map(x=>({val:x.n,ok:false}))]);
+    answer=`<div class="choices-grid">${choices.map(c=>`<button class="choice-btn num" onclick="checkRev(this,${c.ok},'${item.n}')">${c.val.toLocaleString()}</button>`).join('')}</div>`;
+
+  } else if(reviewType==='time-jp'){
+    prompt=`<div class="q-label">What time is this?</div>${clockSVG(item.hour,120)}`;
+    const pool=shuffle(TIME_ITEMS.filter(t=>t.jp!==item.jp)).slice(0,3);
+    const choices=shuffle([{val:item.jp,ok:true},...pool.map(t=>({val:t.jp,ok:false}))]);
+    answer=`<div class="choices-grid">${choices.map(c=>`<button class="choice-btn jpnum" onclick="checkRev(this,${c.ok},'${escQ(item.jp)}')">${c.val}</button>`).join('')}</div>`;
+
+  } else { // jp-time: typed
+    prompt=`<div class="q-label">How do you read this time?</div><div class="q-jp">${item.jp}</div>`;
+    const safe=escQ(item.rom);
+    answer=`<input class="answer-input" id="rev-input" type="text"
+      autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+      placeholder="e.g. ichiji…"/>
+      <button class="submit-btn" onclick="checkRevTyped('${safe}')">Submit</button>`;
+  }
+
+  el.innerHTML=`
     <div class="review-score">
-      <div class="frac">${reviewIndex}<span style="font-size:24px;opacity:.4">/10</span></div>
-      <div class="lbl">${reviewCorrect} correct · ${reviewType === 'char-rom' ? 'Kana → Romaji' : 'Romaji → Kana'}</div>
+      <div class="frac">${reviewIndex}<span style="font-size:22px;opacity:.4">/${reviewWords.length}</span></div>
+      <div class="lbl">${reviewCorrect} correct</div>
     </div>
-    <div class="question-card" style="min-height:150px">${prompt}</div>
-    <div class="choices-grid" id="review-choices">
-      ${choices.map((c,i) => `<button class="${btnClass}" onclick="checkReview(${i}, ${c.correct})">${c.val}</button>`).join('')}
-    </div>
-    <div class="feedback-area"><div class="feedback-pill" id="review-fb"></div></div>`;
+    <div class="question-card" style="min-height:145px">${prompt}</div>
+    ${answer}
+    <div class="feedback-area"><div class="feedback-pill" id="rev-fb"></div></div>`;
+
+  if(reviewType==='jp-time'){
+    setTimeout(()=>{
+      const inp=document.getElementById('rev-input');
+      if(inp){
+        inp.focus();
+        inp.addEventListener('keydown',e=>{if(e.key==='Enter')checkRevTyped(escQ(reviewWords[reviewIndex-1]?.rom||''));});
+      }
+    },80);
+  }
 }
 
-function checkReview(idx, isCorrect) {
-  const btns = document.querySelectorAll('#review-choices .choice-btn');
-  btns.forEach(b => b.disabled = true);
-  const fb = document.getElementById('review-fb');
-
-  if (isCorrect) {
-    btns[idx].classList.add('correct');
-    reviewCorrect++;
-    fb.className = 'feedback-pill correct show'; fb.textContent = '✓ Correct!';
+function checkRev(btn, ok, correctDisplay){
+  document.querySelectorAll('#review-content .choice-btn').forEach(b=>b.disabled=true);
+  const fb=document.getElementById('rev-fb');
+  if(ok){
+    btn.classList.add('correct'); reviewCorrect++;
+    fb.className='feedback-pill correct show'; fb.textContent='✓ Correct!';
   } else {
-    btns[idx].classList.add('wrong');
-    // find and highlight correct
-    btns.forEach((b, i) => {
-      if (b.textContent === reviewWords[reviewIndex].char || b.textContent === reviewWords[reviewIndex].rom) {
-        if (!b.classList.contains('wrong')) b.classList.add('correct');
-      }
+    btn.classList.add('wrong');
+    document.querySelectorAll('#review-content .choice-btn').forEach(b=>{
+      if(b.textContent.trim()===String(correctDisplay)) b.classList.add('correct');
     });
-    fb.className = 'feedback-pill reveal show';
-    fb.textContent = 'Correct: ' + (reviewType === 'char-rom' ? reviewWords[reviewIndex].rom : reviewWords[reviewIndex].char);
+    fb.className='feedback-pill reveal show'; fb.textContent='✗ '+correctDisplay;
   }
   reviewIndex++;
-  setTimeout(reviewIndex < reviewWords.length ? showReviewQ : showReviewDone, 1200);
+  setTimeout(reviewIndex<reviewWords.length?showReviewQ:showReviewDone,1200);
 }
 
-function showReviewDone() {
-  const pct   = Math.round((reviewCorrect / reviewWords.length) * 100);
-  const emoji = pct >= 80 ? '🌟' : pct >= 50 ? '👍' : '📚';
-  const msg   = pct === 100 ? 'Perfect score!' : pct >= 80 ? 'Great work!' : pct >= 50 ? 'Getting there!' : 'Keep practising!';
-  document.getElementById('review-content').innerHTML = `
+function checkRevTyped(correct){
+  const inp=document.getElementById('rev-input');
+  if(!inp) return;
+  const val=inp.value.trim().toLowerCase();
+  const alts=correct.toLowerCase().split('/').map(s=>s.trim());
+  const ok=alts.includes(val);
+  inp.disabled=true;
+  document.querySelector('#review-content .submit-btn').disabled=true;
+  const fb=document.getElementById('rev-fb');
+  if(ok){
+    inp.className='answer-input correct'; reviewCorrect++;
+    fb.className='feedback-pill correct show'; fb.textContent='✓ Correct!';
+  } else {
+    inp.className='answer-input wrong';
+    fb.className='feedback-pill reveal show'; fb.textContent='✗ '+correct;
+  }
+  reviewIndex++;
+  setTimeout(reviewIndex<reviewWords.length?showReviewQ:showReviewDone,1500);
+}
+
+function showReviewDone(){
+  const pct=Math.round(reviewCorrect/reviewWords.length*100);
+  const emoji=pct>=80?'🌟':pct>=50?'👍':'📚';
+  const msg=pct===100?'Perfect!':pct>=80?'Great work!':pct>=50?'Getting there!':'Keep practising!';
+  document.getElementById('review-content').innerHTML=`
     <div class="complete-card">
       <div class="big-emoji">${emoji}</div>
       <h2>${msg}</h2>
-      <p>${reviewCorrect}/10 correct — ${pct}%</p>
+      <p>${reviewCorrect}/${reviewWords.length} correct — ${pct}%</p>
       <button class="complete-btn" onclick="startReview('${reviewType}')">Try Again ↺</button>
       <button class="complete-btn secondary" onclick="showScreen('home')">Back to Home</button>
     </div>`;
 }
 
-// ── FONT TOGGLE ────────────────────────────────────────────────
-function setFont(style, screen) {
-  if (style === 'brush') {
-    document.body.classList.add('brush-font');
-  } else {
-    document.body.classList.remove('brush-font');
-  }
-  // Update button states for whichever screen's toggle was used
-  const prefixes = { study: 'study', quiz: 'quiz', review: 'rev' };
-  const p = prefixes[screen];
-  if (p) {
-    const cleanBtn = document.getElementById(p + '-ft-clean');
-    const brushBtn = document.getElementById(p + '-ft-brush');
-    if (cleanBtn) cleanBtn.classList.toggle('active', style === 'clean');
-    if (brushBtn) brushBtn.classList.toggle('active', style === 'brush');
-  }
-}
-
-// ── INIT ───────────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', ()=>{
   renderHome();
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
 });
 </script>
 </body>
