@@ -782,7 +782,12 @@ function buildQuestion(item) {
       qCard.innerHTML=`<div class="q-label">How do you say this?</div>
         <div class="q-number">${item.n.toLocaleString()}</div>
         ${hint&&item.hint?`<div class="q-hint">${item.hint}</div>`:''}`;
-      const pool=shuffle(NUM_ITEMS.filter(x=>x.jp!==item.jp)).slice(0,3);
+      const blockItems=NUM_BLOCKS[currentBlockIndex].items;
+      let pool=shuffle(blockItems.filter(x=>x.jp!==item.jp));
+      if(pool.length<3){
+        const others=shuffle(NUM_ITEMS.filter(x=>x.jp!==item.jp&&!blockItems.includes(x)));
+        pool=[...pool,...others].slice(0,3);
+      } else { pool=pool.slice(0,3); }
       const choices=shuffle([{val:item.jp,ok:true},...pool.map(x=>({val:x.jp,ok:false}))]);
       aEl.innerHTML=`<div class="choices-grid">${choices.map(c=>
         `<button class="choice-btn jpnum" onclick="checkMC(this,${c.ok})">${c.val}</button>`
@@ -805,8 +810,7 @@ function buildQuestion(item) {
       correct=item.rom; ph='Type romaji…';
     } else if(currentTab==='numbers'){
       prompt=`<div class="q-label">How do you read this?</div>
-        <div class="q-jp">${item.jp}</div>
-        ${hint&&item.hint?`<div class="q-hint">${item.hint}</div>`:''}`;
+        <div class="q-jp">${item.jp}</div>`;
       correct=item.rom; ph='Type romaji…';
     } else {
       prompt=`<div class="q-label">Type the Japanese reading</div>${clockSVG(item.hour,110)}`;
@@ -984,13 +988,13 @@ function showReviewQ(){
 
   } else if(reviewType==='num-jp'){
     prompt=`<div class="q-label">How do you say this?</div><div class="q-number">${item.n.toLocaleString()}</div>`;
-    const pool=shuffle(NUM_ITEMS.filter(x=>x.jp!==item.jp)).slice(0,3);
+    const pool=shuffle(reviewWords.filter(x=>x.jp!==item.jp)).slice(0,3);
     const choices=shuffle([{val:item.jp,ok:true},...pool.map(x=>({val:x.jp,ok:false}))]);
     answer=`<div class="choices-grid">${choices.map(c=>`<button class="choice-btn jpnum" onclick="checkRev(this,${c.ok},'${escQ(item.jp)}')">${c.val}</button>`).join('')}</div>`;
 
   } else if(reviewType==='jp-num'){
     prompt=`<div class="q-label">What number is this?</div><div class="q-jp">${item.jp}</div>`;
-    const pool=shuffle(NUM_ITEMS.filter(x=>x.n!==item.n)).slice(0,3);
+    const pool=shuffle(reviewWords.filter(x=>x.n!==item.n)).slice(0,3);
     const choices=shuffle([{val:item.n,ok:true},...pool.map(x=>({val:x.n,ok:false}))]);
     answer=`<div class="choices-grid">${choices.map(c=>`<button class="choice-btn num" onclick="checkRev(this,${c.ok},'${item.n}')">${c.val.toLocaleString()}</button>`).join('')}</div>`;
 
